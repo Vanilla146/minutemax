@@ -1,0 +1,458 @@
+/* ===========================================
+   Visual Queue Animation - Light Minimalist Theme
+   =========================================== */
+
+.visual-queue {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Confetti Container */
+.confetti-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.confetti-particle {
+    will-change: transform, opacity;
+}
+
+/* Header */
+.visual-queue .queue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 0;
+    text-align: left;
+}
+
+.visual-queue .queue-header h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #171717;
+}
+
+.position-number {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #171717;
+}
+
+.your-turn-text {
+    color: #22c55e;
+    display: inline-block;
+}
+
+.wait-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 4px;
+    color: #92400e;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Progress Bar */
+.visual-queue .queue-progress {
+    height: 8px;
+    background: #e5e5e5;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: visible;
+}
+
+.visual-queue .progress-fill {
+    height: 100%;
+    background: #171717;
+    border-radius: 4px;
+    position: relative;
+    overflow: visible;
+}
+
+.visual-queue .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: #171717;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #171717;
+}
+
+.progress-glow {
+    display: none;
+}
+
+.progress-markers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.marker {
+    width: 6px;
+    height: 6px;
+    background: #d4d4d4;
+    border-radius: 50%;
+    margin-top: 1px;
+    transition: all 0.3s ease;
+}
+
+.marker.passed {
+    background: #171717;
+}
+
+/* Queue Visualization */
+.visual-queue .queue-visualization {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 0;
+    overflow-x: auto;
+    position: relative;
+    flex-wrap: wrap;
+}
+
+.service-counter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 4px;
+    min-width: 90px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.service-counter.active {
+    background: #dcfce7;
+    border-color: #22c55e;
+}
+
+.counter-icon {
+    font-size: 1.5rem;
+}
+
+.service-counter span {
+    font-size: 10px;
+    color: #22c55e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.queue-line {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    overflow-x: auto;
+    padding: 8px 0;
+    align-items: center;
+}
+
+.queue-person {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 44px;
+    flex-shrink: 0;
+}
+
+.person-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    border: 2px solid #e5e5e5;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    color: #9ca3af;
+    transition: all 0.3s ease;
+}
+
+.queue-person.is-you .person-icon {
+    background: #171717;
+    border-color: #171717;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.queue-person.served .person-icon {
+    background: #dcfce7;
+    border-color: #86efac;
+    color: #22c55e;
+    opacity: 0.6;
+}
+
+.you-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #171717;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.person-number {
+    font-size: 10px;
+    color: #9ca3af;
+}
+
+/* Queue Stats */
+.queue-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.stat {
+    text-align: center;
+    padding: 12px;
+    background: #fafafa;
+    border-radius: 4px;
+    border: 1px solid #e5e5e5;
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+.stat:hover {
+    border-color: #d4d4d4;
+    background: #f5f5f5;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #171717;
+}
+
+.stat-label {
+    font-size: 10px;
+    color: #676869;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Your Turn Overlay */
+.your-turn-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.97);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 15;
+    border-radius: 4px;
+}
+
+/* Pulse Rings */
+.pulse-rings {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+}
+
+.pulse-ring {
+    position: absolute;
+    inset: 0;
+    border: 3px solid #22c55e;
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.celebration {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.your-turn-overlay h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #22c55e;
+    margin-bottom: 8px;
+}
+
+.your-turn-overlay p {
+    color: #676869;
+    font-size: 16px;
+}
+
+/* Floating Stars */
+.floating-stars {
+    position: absolute;
+    bottom: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.floating-star {
+    position: absolute;
+    font-size: 1.5rem;
+}
+
+/* ===========================================
+   Responsive Breakpoints
+   =========================================== */
+
+@media (max-width: 768px) {
+    .visual-queue {
+        padding: 16px;
+    }
+
+    .visual-queue .queue-header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .visual-queue .queue-visualization {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .queue-line {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .queue-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .your-turn-overlay h2 {
+        font-size: 1.5rem;
+    }
+
+    .celebration {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .visual-queue {
+        padding: 12px;
+    }
+
+    .visual-queue .queue-header h3 {
+        font-size: 14px;
+    }
+
+    .position-number {
+        font-size: 1.5rem;
+    }
+
+    .wait-time {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .person-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .service-counter {
+        padding: 12px 14px;
+        min-width: 80px;
+    }
+
+    .counter-icon {
+        font-size: 1.5rem;
+    }
+
+    .stat {
+        padding: 10px;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}

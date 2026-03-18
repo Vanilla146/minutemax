@@ -1,0 +1,1009 @@
+/* ===========================================
+   Queue Page - Minimalist White Theme
+   =========================================== */
+
+.queue-page {
+    min-height: 100vh;
+    padding-top: 70px;
+    background: #ffffff;
+    position: relative;
+}
+
+.queue-bg-gradient {
+    display: none;
+}
+
+/* Header */
+.queue-header {
+    padding: 48px 0 32px;
+}
+
+.queue-hero-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.queue-header-content {
+    text-align: left;
+}
+
+.queue-hero-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.queue-hero-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.page-label {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #676869;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+}
+
+.queue-header h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 500;
+    color: #171717;
+    margin-bottom: 8px;
+}
+
+.queue-header p {
+    font-size: 14px;
+    color: #676869;
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-width: calc(100% - 32px);
+}
+
+.notification-success {
+    border-left: 4px solid #22c55e;
+}
+
+.notification-alert {
+    border-left: 4px solid #f59e0b;
+    animation: pulse 1.5s infinite;
+}
+
+.notification-info {
+    border-left: 4px solid #3b82f6;
+}
+
+.notification svg {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.notification button {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 1.25rem;
+    cursor: pointer;
+    margin-left: 8px;
+    padding: 4px;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+    }
+}
+
+/* Main Content */
+.queue-content {
+    padding: 24px 0 60px;
+}
+
+.queue-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+}
+
+/* Queue Panel */
+.queue-panel {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 24px;
+}
+
+.queue-panel h2 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #171717;
+    margin-bottom: 6px;
+}
+
+.queue-instruction {
+    color: #676869;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* API Status Badge */
+.api-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 10px 16px;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 4px;
+    color: #92400e;
+    font-size: 13px;
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    color: #676869;
+}
+
+.loading-state .spinner {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Store List */
+.store-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.store-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.store-card:hover {
+    border-color: #171717;
+    background: #ffffff;
+}
+
+.store-icon {
+    width: 44px;
+    height: 44px;
+    background: #171717;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.store-info h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: #171717;
+    margin-bottom: 4px;
+}
+
+.store-info p {
+    color: #676869;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.store-queues {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.store-queues span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #676869;
+}
+
+.store-queues svg {
+    color: #171717;
+}
+
+/* Back Button */
+.back-btn {
+    background: none;
+    border: none;
+    color: #676869;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    padding: 0;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.back-btn:hover {
+    color: #171717;
+}
+
+/* Smart Queue Detection */
+.smart-queue-detect {
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.smart-queue-detect h4 {
+    text-align: center;
+    color: #171717;
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.intent-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.intent-btn {
+    padding: 12px 20px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    color: #171717;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.intent-btn:hover {
+    background: #171717;
+    border-color: #171717;
+    color: #ffffff;
+}
+
+.intent-btn.browse {
+    background: transparent;
+    border-color: #d4d4d4;
+    color: #676869;
+}
+
+.intent-btn.browse:hover {
+    background: #f5f5f5;
+    border-color: #d4d4d4;
+    color: #171717;
+}
+
+.queue-divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.queue-divider::before,
+.queue-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e5e5;
+}
+
+.queue-divider span {
+    padding: 0 12px;
+    color: #9ca3af;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Queue Options */
+.queue-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.queue-option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.queue-option:hover {
+    border-color: #171717;
+    background: #fafafa;
+}
+
+.queue-option-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 20px;
+    color: #171717;
+    flex-shrink: 0;
+}
+
+.queue-option-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.queue-option-info h3 {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #171717;
+}
+
+.queue-description {
+    font-size: 13px;
+    color: #676869;
+    margin-bottom: 8px;
+}
+
+.queue-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #676869;
+    flex-wrap: wrap;
+}
+
+.queue-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.queue-option-action {
+    color: #171717;
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* Queue Status */
+.queue-status {
+    text-align: center;
+}
+
+.status-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.status-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 24px;
+    color: white;
+    background: #171717;
+}
+
+.status-title h2 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #171717;
+    margin-bottom: 4px;
+}
+
+.status-title p {
+    color: #22c55e;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Token Display */
+.token-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.token-label {
+    font-size: 11px;
+    color: #676869;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.token-number {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #171717;
+}
+
+/* Store Info Badge */
+.store-info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    color: #676869;
+    font-size: 13px;
+}
+
+.store-info-badge svg {
+    color: #171717;
+}
+
+/* Status Cards */
+.status-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.status-card {
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+}
+
+.status-card.highlight {
+    background: #171717;
+    border-color: #171717;
+}
+
+.status-card svg {
+    font-size: 18px;
+    color: #171717;
+    margin-bottom: 8px;
+}
+
+.status-card.highlight svg {
+    color: white;
+}
+
+.status-card-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #171717;
+    margin-bottom: 4px;
+}
+
+.status-card.highlight .status-card-value {
+    color: #ffffff;
+}
+
+.status-card-label {
+    font-size: 12px;
+    color: #676869;
+}
+
+.status-card.highlight .status-card-label {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Your Turn Alert */
+.your-turn-alert {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #92400e;
+}
+
+/* Queue Progress */
+.queue-progress {
+    margin-bottom: 20px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e5e5e5;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #171717;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: #676869;
+}
+
+.leave-btn {
+    width: 100%;
+}
+
+/* Queue Visualization - 3D Container */
+.queue-visualization-3d {
+    position: sticky;
+    top: 90px;
+}
+
+.visualization-container {
+    height: 350px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.viz-loader {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #676869;
+}
+
+.visualization-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: #676869;
+}
+
+/* QR Section */
+.qr-section {
+    padding: 48px 0;
+}
+
+.qr-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 32px;
+    background: #171717;
+    border-radius: 4px;
+}
+
+.qr-content h3 {
+    font-size: 18px;
+    font-weight: 500;
+    color: white;
+    margin-bottom: 6px;
+}
+
+.qr-content p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+.qr-code-placeholder {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: 4px;
+    padding: 8px;
+    flex-shrink: 0;
+}
+
+.qr-code-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: white;
+    border-radius: 4px;
+}
+
+.qr-code-container svg {
+    display: block;
+}
+
+.qr-scan-hint {
+    font-size: 11px;
+    color: #171717;
+    font-weight: 500;
+    margin: 0;
+}
+
+.qr-pattern {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    width: 100%;
+    height: 100%;
+}
+
+.qr-cell {
+    background: #171717;
+    border-radius: 2px;
+}
+
+/* QR Fullscreen Button */
+.qr-fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.qr-fullscreen-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.qr-fullscreen-btn svg {
+    font-size: 14px;
+}
+
+/* ===========================================
+   Responsive Breakpoints
+   =========================================== */
+
+@media (max-width: 1024px) {
+    .queue-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .queue-visualization {
+        position: relative;
+        top: 0;
+    }
+
+    .visualization-container {
+        height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .queue-page {
+        padding-top: 60px;
+    }
+
+    .queue-header {
+        padding: 32px 0 24px;
+    }
+
+    .queue-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .queue-content {
+        padding: 16px 0 48px;
+    }
+
+    .queue-panel {
+        padding: 20px;
+    }
+
+    .queue-panel h2 {
+        font-size: 16px;
+    }
+
+    .status-cards {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .status-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+        padding: 14px;
+    }
+
+    .status-card svg {
+        margin-bottom: 0;
+    }
+
+    .status-card-value {
+        font-size: 1.25rem;
+    }
+
+    .qr-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px;
+        gap: 20px;
+    }
+
+    .smart-queue-detect {
+        padding: 16px;
+    }
+
+    .intent-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .intent-btn {
+        width: 100%;
+        padding: 14px 16px;
+    }
+
+    .queue-option {
+        padding: 14px;
+        flex-wrap: wrap;
+    }
+
+    .queue-option-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .queue-option-info h3 {
+        font-size: 14px;
+    }
+
+    .queue-option-action {
+        width: 100%;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #e5e5e5;
+        text-align: center;
+    }
+
+    .store-card {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .store-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .notification {
+        top: 70px;
+        left: 16px;
+        right: 16px;
+        transform: none;
+        max-width: none;
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    .visualization-container {
+        height: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .queue-page {
+        padding-top: 55px;
+    }
+
+    .queue-header {
+        padding: 24px 0 20px;
+    }
+
+    .queue-hero-layout {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .queue-hero-image {
+        display: none;
+    }
+
+    .queue-header-content {
+        text-align: center;
+    }
+
+    .queue-header h1 {
+        font-size: 1.25rem;
+    }
+
+    .queue-header p {
+        font-size: 13px;
+    }
+
+    .queue-content {
+        padding: 12px 0 40px;
+    }
+
+    .queue-panel {
+        padding: 16px;
+    }
+
+    .queue-panel h2 {
+        font-size: 15px;
+    }
+
+    .queue-instruction {
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+
+    .smart-queue-detect h4 {
+        font-size: 13px;
+    }
+
+    .intent-btn {
+        font-size: 13px;
+        padding: 12px 14px;
+    }
+
+    .queue-option-info h3 {
+        font-size: 13px;
+    }
+
+    .queue-description {
+        font-size: 12px;
+    }
+
+    .queue-meta {
+        font-size: 11px;
+        gap: 12px;
+    }
+
+    .token-number {
+        font-size: 2rem;
+    }
+
+    .status-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 20px;
+    }
+
+    .status-title h2 {
+        font-size: 16px;
+    }
+
+    .your-turn-alert {
+        padding: 14px;
+        font-size: 14px;
+    }
+
+    .qr-card {
+        padding: 20px;
+    }
+
+    .qr-content h3 {
+        font-size: 16px;
+    }
+
+    .qr-content p {
+        font-size: 13px;
+    }
+
+    .visualization-container {
+        height: 200px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 350px) {
+    .queue-panel {
+        padding: 12px;
+    }
+
+    .queue-option {
+        padding: 12px;
+    }
+
+    .queue-option-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .intent-btn {
+        font-size: 12px;
+        padding: 10px 12px;
+    }
+
+    .token-number {
+        font-size: 1.75rem;
+    }
+}

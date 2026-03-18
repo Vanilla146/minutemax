@@ -1,0 +1,148 @@
+{
+    "common": {
+        "appName": "MinuteMax",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "cancel": "Cancel",
+        "save": "Save",
+        "close": "Close",
+        "back": "Back",
+        "next": "Next",
+        "submit": "Submit",
+        "search": "Search",
+        "filter": "Filter",
+        "all": "All"
+    },
+    "nav": {
+        "home": "Home",
+        "queue": "Queue",
+        "outfitMatch": "AI Outfit Match",
+        "dashboard": "Dashboard",
+        "login": "Login",
+        "register": "Register",
+        "logout": "Logout",
+        "profile": "Profile",
+        "settings": "Settings"
+    },
+    "landing": {
+        "hero": {
+            "title": "Skip the Wait, Love the Shop",
+            "subtitle": "AI-powered queue management and outfit matching for the modern shopper",
+            "cta": "Get Started"
+        },
+        "features": {
+            "queue": {
+                "title": "Smart Queue",
+                "desc": "Join queues remotely and get notified when it's your turn"
+            },
+            "outfit": {
+                "title": "AI Outfit Match",
+                "desc": "Upload a photo and get instant outfit recommendations"
+            },
+            "realtime": {
+                "title": "Real-time Updates",
+                "desc": "Track your position and estimated wait time"
+            }
+        }
+    },
+    "queue": {
+        "title": "Join Queue",
+        "scanQR": "Scan QR Code",
+        "orJoinManually": "Or join manually",
+        "fittingRoom": "Fitting Room",
+        "cashier": "Cashier",
+        "joinQueue": "Join Queue",
+        "leaveQueue": "Leave Queue",
+        "yourPosition": "Your Position",
+        "estimatedWait": "Estimated Wait",
+        "minutes": "minutes",
+        "peopleAhead": "people ahead",
+        "yourTurn": "It's Your Turn!",
+        "pleaseHead": "Please head to the",
+        "notificationEnabled": "Notifications Enabled",
+        "notifyMe": "Notify me 2-5 mins before",
+        "queueEmpty": "Queue is empty",
+        "nowServing": "Now Serving"
+    },
+    "outfit": {
+        "title": "AI Outfit Match",
+        "subtitle": "Upload a photo and get instant matching outfit recommendations",
+        "uploadPhoto": "Upload Your Photo",
+        "dragDrop": "Drag and drop or click to upload",
+        "supportedFormats": "Supports JPG, PNG, WebP up to 10MB",
+        "analyzing": "Analyzing with AI...",
+        "aiModelReady": "AI Model Ready",
+        "aiModelLoading": "Loading AI Model...",
+        "matchedOutfits": "Matched Outfits",
+        "matchScore": "Match",
+        "filters": {
+            "title": "Filter Results",
+            "occasion": "Occasion",
+            "bodyType": "Body Type",
+            "skinTone": "Skin Tone"
+        },
+        "occasions": {
+            "casual": "Casual",
+            "formal": "Formal",
+            "party": "Party",
+            "office": "Office",
+            "wedding": "Wedding",
+            "sport": "Sports"
+        },
+        "bookFitting": "Book Fitting Room",
+        "addToCart": "Add to Cart",
+        "tryAR": "Try with AR",
+        "detectedColors": "Detected Colors",
+        "complementaryColors": "Complementary Colors"
+    },
+    "dashboard": {
+        "welcome": "Welcome",
+        "overview": "Overview",
+        "queueHistory": "Queue History",
+        "savedItems": "Saved Items",
+        "settings": "Settings",
+        "stats": {
+            "queueJoins": "Queue Joins",
+            "timeSaved": "Time Saved",
+            "savedItems": "Saved Items",
+            "activity": "Activity"
+        },
+        "recentActivity": "Recent Activity",
+        "noActivity": "No recent activity"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": "Language",
+        "selectLanguage": "Select Language",
+        "notifications": "Notifications",
+        "pushNotifications": "Push Notifications",
+        "emailNotifications": "Email Notifications",
+        "profile": "Profile",
+        "updateProfile": "Update Profile",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone"
+    },
+    "auth": {
+        "login": "Login",
+        "register": "Register",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "name": "Full Name",
+        "phone": "Phone Number",
+        "forgotPassword": "Forgot Password?",
+        "noAccount": "Don't have an account?",
+        "haveAccount": "Already have an account?",
+        "loginSuccess": "Login successful!",
+        "registerSuccess": "Registration successful!",
+        "invalidCredentials": "Invalid email or password"
+    },
+    "notifications": {
+        "queueAlertTitle": "Your Turn is Coming!",
+        "queueAlertBody": "Only {{count}} people ahead of you. Please be ready!",
+        "yourTurnTitle": "It's Your Turn!",
+        "yourTurnBody": "Please proceed to the {{queueType}}"
+    }
+}

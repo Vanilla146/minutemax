@@ -1,0 +1,657 @@
+/* ===========================================
+   Staff Dashboard - Minimalist White Theme
+   =========================================== */
+
+.staff-dashboard {
+    min-height: 100vh;
+    padding: 70px 24px 32px;
+    background: #ffffff;
+}
+
+/* ===========================================
+   Page Header
+   =========================================== */
+
+.staff-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.header-left h1 {
+    font-size: 20px;
+    font-weight: 500;
+    color: #171717;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-left p {
+    font-size: 13px;
+    color: #676869;
+    margin: 4px 0 0 0;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.current-load {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #676869;
+}
+
+.current-load.high {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.current-load.normal {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #16a34a;
+}
+
+.refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+    font-size: 13px;
+    color: #676869;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+    border-color: #d4d4d4;
+    background: #f5f5f5;
+    color: #171717;
+}
+
+/* ===========================================
+   Stats Grid
+   =========================================== */
+
+.staff-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #171717;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #676869;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 500;
+    color: #171717;
+}
+
+/* ===========================================
+   Main Grid Layout
+   =========================================== */
+
+.staff-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 24px;
+}
+
+/* ===========================================
+   Queue Section
+   =========================================== */
+
+.queue-section {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.queue-tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.queue-tab {
+    flex: 1;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+    font-weight: 400;
+    color: #676869;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.queue-tab:hover {
+    color: #171717;
+    background: #fafafa;
+}
+
+.queue-tab.active {
+    color: #171717;
+    font-weight: 500;
+    border-bottom-color: #171717;
+}
+
+.queue-tab .queue-badge {
+    background: #f5f5f5;
+    color: #676869;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.queue-tab.active .queue-badge {
+    background: #171717;
+    color: #ffffff;
+}
+
+/* ===========================================
+   Currently Serving
+   =========================================== */
+
+.currently-serving {
+    padding: 16px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.currently-serving h3 {
+    font-size: 12px;
+    font-weight: 500;
+    color: #676869;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.serving-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.serving-token {
+    font-size: 18px;
+    font-weight: 600;
+    color: #171717;
+    padding: 8px 16px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.serving-info h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #171717;
+    margin: 0;
+}
+
+.serving-info p {
+    font-size: 12px;
+    color: #676869;
+    margin: 2px 0 0 0;
+}
+
+.serving-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.no-serving {
+    text-align: center;
+    padding: 24px;
+    color: #676869;
+    font-size: 13px;
+}
+
+/* ===========================================
+   Queue List
+   =========================================== */
+
+.queue-list-section {
+    padding: 16px;
+}
+
+.queue-list-section h3 {
+    font-size: 12px;
+    font-weight: 500;
+    color: #676869;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.queue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.queue-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.queue-item:hover {
+    border-color: #d4d4d4;
+}
+
+.queue-position {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 500;
+    color: #676869;
+}
+
+.queue-info {
+    flex: 1;
+}
+
+.queue-info h4 {
+    font-size: 13px;
+    font-weight: 500;
+    color: #171717;
+    margin: 0;
+}
+
+.queue-info p {
+    font-size: 11px;
+    color: #676869;
+    margin: 2px 0 0 0;
+}
+
+.queue-time {
+    font-size: 11px;
+    color: #676869;
+}
+
+/* Call Single Button */
+.call-single-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #171717;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.call-single-btn:hover {
+    background: #333333;
+    transform: translateY(-1px);
+}
+
+.call-single-btn:active {
+    transform: translateY(0);
+}
+
+/* ===========================================
+   Analytics Section
+   =========================================== */
+
+.analytics-section {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 16px;
+}
+
+.analytics-section h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #171717;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.analytics-card {
+    padding: 12px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.analytics-card:last-child {
+    margin-bottom: 0;
+}
+
+.analytics-card h4 {
+    font-size: 12px;
+    font-weight: 500;
+    color: #676869;
+    margin: 0 0 8px 0;
+}
+
+.analytics-value {
+    font-size: 20px;
+    font-weight: 500;
+    color: #171717;
+}
+
+.wait-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.wait-stat {
+    text-align: center;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.wait-stat .value {
+    font-size: 18px;
+    font-weight: 500;
+    color: #171717;
+}
+
+.wait-stat .label {
+    font-size: 11px;
+    color: #676869;
+    margin-top: 2px;
+}
+
+/* ===========================================
+   Performance Stats
+   =========================================== */
+
+.performance-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.perf-stat {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.perf-value {
+    font-size: 16px;
+    font-weight: 500;
+    color: #171717;
+}
+
+.perf-label {
+    font-size: 11px;
+    color: #676869;
+    margin-top: 2px;
+}
+
+/* ===========================================
+   POS Handoff Modal
+   =========================================== */
+
+.pos-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1070;
+    padding: 24px;
+}
+
+.pos-modal {
+    background: #ffffff;
+    border-radius: 6px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.pos-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.pos-modal-header h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #171717;
+    margin: 0;
+}
+
+.pos-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #676869;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.pos-close:hover {
+    color: #171717;
+}
+
+.pos-modal-body {
+    padding: 16px;
+}
+
+.pos-customer-info {
+    margin-bottom: 16px;
+}
+
+.pos-customer-info h4 {
+    margin: 0 0 8px;
+    color: #171717;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.pos-customer-info p {
+    margin: 4px 0;
+    color: #676869;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.pos-items {
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.pos-items h5 {
+    margin: 0 0 8px;
+    color: #171717;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.pos-items ul {
+    margin: 0;
+    padding-left: 16px;
+    color: #676869;
+    font-size: 13px;
+}
+
+.pos-items li {
+    margin-bottom: 4px;
+}
+
+.pos-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.pos-actions .btn {
+    flex: 1;
+}
+
+/* ===========================================
+   Responsive Breakpoints
+   =========================================== */
+
+@media (max-width: 1200px) {
+    .staff-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .staff-main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .staff-dashboard {
+        padding: 65px 16px 24px;
+    }
+
+    .staff-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .staff-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .serving-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .serving-token {
+        width: fit-content;
+        margin: 0 auto;
+    }
+
+    .serving-actions {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .staff-dashboard {
+        padding: 60px 12px 20px;
+    }
+
+    .staff-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .queue-tabs {
+        flex-direction: column;
+    }
+
+    .performance-stats {
+        flex-direction: column;
+    }
+
+    .pos-actions {
+        flex-direction: column;
+    }
+}

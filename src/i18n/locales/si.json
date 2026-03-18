@@ -1,0 +1,148 @@
+{
+    "common": {
+        "appName": "මිනිට්මැක්ස්",
+        "loading": "පූරණය වෙමින්...",
+        "error": "දෝෂයක්",
+        "success": "සාර්ථකයි",
+        "cancel": "අවලංගු කරන්න",
+        "save": "සුරකින්න",
+        "close": "වසන්න",
+        "back": "ආපසු",
+        "next": "ඊළඟ",
+        "submit": "යොමු කරන්න",
+        "search": "සොයන්න",
+        "filter": "පෙරන්න",
+        "all": "සියල්ල"
+    },
+    "nav": {
+        "home": "මුල් පිටුව",
+        "queue": "පෝලිම",
+        "outfitMatch": "AI ඇඳුම් ගැලපීම",
+        "dashboard": "උපකරණ පුවරුව",
+        "login": "පිවිසෙන්න",
+        "register": "ලියාපදිංචි වන්න",
+        "logout": "පිටවීම",
+        "profile": "පැතිකඩ",
+        "settings": "සැකසුම්"
+    },
+    "landing": {
+        "hero": {
+            "title": "රැඳීම මඟහරින්න, සාප්පු සවාරි භුක්ති විඳින්න",
+            "subtitle": "නවීන සාප්පු සවාරිකරුවන් සඳහා AI බලයෙන් ක්‍රියාත්මක පෝලිම් කළමනාකරණය සහ ඇඳුම් ගැලපීම",
+            "cta": "ආරම්භ කරන්න"
+        },
+        "features": {
+            "queue": {
+                "title": "ස්මාර්ට් පෝලිම",
+                "desc": "දුරස්ථව පෝලිම්වලට සම්බන්ධ වී ඔබේ වාරය පැමිණෙන විට දැනුම් දීමක් ලබන්න"
+            },
+            "outfit": {
+                "title": "AI ඇඳුම් ගැලපීම",
+                "desc": "පින්තූරයක් උඩුගත කර ක්ෂණික ඇඳුම් නිර්දේශ ලබන්න"
+            },
+            "realtime": {
+                "title": "තත්‍ය කාලීන යාවත්කාලීන",
+                "desc": "ඔබේ ස්ථානය සහ ඇස්තමේන්තුගත රැඳීමේ කාලය නිරීක්ෂණය කරන්න"
+            }
+        }
+    },
+    "queue": {
+        "title": "පෝලිමට සම්බන්ධ වන්න",
+        "scanQR": "QR කේතය ස්කෑන් කරන්න",
+        "orJoinManually": "හෝ අතින් සම්බන්ධ වන්න",
+        "fittingRoom": "ඇඳුම් කාමරය",
+        "cashier": "මුදල් අයකැමි",
+        "joinQueue": "පෝලිමට සම්බන්ධ වන්න",
+        "leaveQueue": "පෝලිමෙන් ඉවත් වන්න",
+        "yourPosition": "ඔබේ ස්ථානය",
+        "estimatedWait": "ඇස්තමේන්තුගත රැඳීම",
+        "minutes": "මිනිත්තු",
+        "peopleAhead": "ඔබට ඉදිරියෙන් සිටින අය",
+        "yourTurn": "ඔබේ වාරයයි!",
+        "pleaseHead": "කරුණාකර යන්න",
+        "notificationEnabled": "දැනුම්දීම් සක්‍රියයි",
+        "notifyMe": "මිනිත්තු 2-5 කට පෙර මට දැනුම් දෙන්න",
+        "queueEmpty": "පෝලිම හිස්ය",
+        "nowServing": "දැන් සේවය කරන්නේ"
+    },
+    "outfit": {
+        "title": "AI ඇඳුම් ගැලපීම",
+        "subtitle": "පින්තූරයක් උඩුගත කර ක්ෂණික ගැලපෙන ඇඳුම් නිර්දේශ ලබන්න",
+        "uploadPhoto": "ඔබේ ඡායාරූපය උඩුගත කරන්න",
+        "dragDrop": "ඇදගෙන අතහරින්න හෝ උඩුගත කිරීමට ක්ලික් කරන්න",
+        "supportedFormats": "10MB දක්වා JPG, PNG, WebP සහාය දක්වයි",
+        "analyzing": "AI සමඟ විශ්ලේෂණය කරමින්...",
+        "aiModelReady": "AI මාදිලිය සූදානම්",
+        "aiModelLoading": "AI මාදිලිය පූරණය වෙමින්...",
+        "matchedOutfits": "ගැලපෙන ඇඳුම්",
+        "matchScore": "ගැලපීම",
+        "filters": {
+            "title": "ප්‍රතිඵල පෙරන්න",
+            "occasion": "අවස්ථාව",
+            "bodyType": "ශරීර වර්ගය",
+            "skinTone": "සම වර්ණය"
+        },
+        "occasions": {
+            "casual": "අවිධිමත්",
+            "formal": "විධිමත්",
+            "party": "සාදය",
+            "office": "කාර්යාලය",
+            "wedding": "විවාහය",
+            "sport": "ක්‍රීඩා"
+        },
+        "bookFitting": "ඇඳුම් කාමරය වෙන් කරන්න",
+        "addToCart": "කරත්තයට එකතු කරන්න",
+        "tryAR": "AR සමඟ උත්සාහ කරන්න",
+        "detectedColors": "හඳුනාගත් වර්ණ",
+        "complementaryColors": "අනුපූරක වර්ණ"
+    },
+    "dashboard": {
+        "welcome": "සාදරයෙන් පිළිගනිමු",
+        "overview": "දළ විసේරණය",
+        "queueHistory": "පෝලිම් ඉතිහාසය",
+        "savedItems": "සුරකින ලද අයිතම",
+        "settings": "සැකසුම්",
+        "stats": {
+            "queueJoins": "පෝලිම් සම්බන්ධ වීම්",
+            "timeSaved": "ඉතිරි කළ කාලය",
+            "savedItems": "සුරකින ලද අයිතම",
+            "activity": "ක්‍රියාකාරකම්"
+        },
+        "recentActivity": "මෑත ක්‍රියාකාරකම්",
+        "noActivity": "මෑත ක්‍රියාකාරකම් නැත"
+    },
+    "settings": {
+        "title": "සැකසුම්",
+        "language": "භාෂාව",
+        "selectLanguage": "භාෂාව තෝරන්න",
+        "notifications": "දැනුම්දීම්",
+        "pushNotifications": "තල්ලු දැනුම්දීම්",
+        "emailNotifications": "ඊමේල් දැනුම්දීම්",
+        "profile": "පැතිකඩ",
+        "updateProfile": "පැතිකඩ යාවත්කාලීන කරන්න",
+        "name": "නම",
+        "email": "ඊමේල්",
+        "phone": "දුරකථන"
+    },
+    "auth": {
+        "login": "පිවිසෙන්න",
+        "register": "ලියාපදිංචි වන්න",
+        "email": "ඊමේල්",
+        "password": "මුරපදය",
+        "confirmPassword": "මුරපදය තහවුරු කරන්න",
+        "name": "සම්පූර්ණ නම",
+        "phone": "දුරකථන අංකය",
+        "forgotPassword": "මුරපදය අමතකද?",
+        "noAccount": "ගිණුමක් නැද්ද?",
+        "haveAccount": "දැනටමත් ගිණුමක් තිබේද?",
+        "loginSuccess": "පිවිසීම සාර්ථකයි!",
+        "registerSuccess": "ලියාපදිංචිය සාර්ථකයි!",
+        "invalidCredentials": "වලංගු නොවන ඊමේල් හෝ මුරපදය"
+    },
+    "notifications": {
+        "queueAlertTitle": "ඔබේ වාරය එළඹෙමින්!",
+        "queueAlertBody": "ඔබට ඉදිරියෙන් {{count}} දෙනෙක් පමණයි. කරුණාකර සූදානම් වන්න!",
+        "yourTurnTitle": "ඔබේ වාරයයි!",
+        "yourTurnBody": "කරුණාකර {{queueType}} වෙත යන්න"
+    }
+}
