@@ -1016,15 +1016,21 @@ app.get('/api/queues/my-status', authMiddleware, async (req, res) => {
         const actualPosition = ahead[0].count + 1
         const estimatedWait = actualPosition * (currentQueue.queue_type === 'checkout' ? 3 : 8)
 
-        res.json({
-            inQueue: true,
-            queue: {
-                ...currentQueue,
-                position: actualPosition,
-                estimatedWait,
-                peopleAhead: ahead[0].count
-            }
-        })
+        const [total] = await pool.query(
+    'SELECT COUNT(*) as count FROM queues WHERE store_id = ? AND queue_type = ? AND status = "waiting"',
+    [currentQueue.store_id, currentQueue.queue_type]
+)
+
+res.json({
+    inQueue: true,
+    queue: {
+        ...currentQueue,
+        position: actualPosition,
+        estimatedWait,
+        peopleAhead: ahead[0].count,
+        totalInQueue: total[0].count
+    }
+})
     } catch (error) {
         console.error('Queue status error:', error)
         res.status(500).json({ error: 'Failed to get queue status' })

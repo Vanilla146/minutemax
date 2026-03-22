@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiCamera, FiUpload, FiHeart, FiShoppingCart, FiRefreshCw, FiFilter, FiX, FiCheck, FiAlertCircle, FiZap, FiStar, FiCpu, FiLoader, FiCalendar, FiSliders, FiEye } from 'react-icons/fi'
 import { outfitService, favoriteService, productService } from '../services/api'
@@ -6,6 +6,7 @@ import { classifyImage, preloadModel, isModelReady } from '../services/imageClas
 import { useAuth } from '../context/AuthContext'
 import AROverlay from '../components/AROverlay'
 import './OutfitMatchPage.css'
+
 
 // Images
 import outfitImage from '../assets/images/outfit-matching.png'
@@ -34,6 +35,10 @@ const OutfitMatchPage = () => {
     const [showFilters, setShowFilters] = useState(false)
     const [bookingModal, setBookingModal] = useState(null)
     const [arOverlay, setArOverlay] = useState(null)
+    const [showCamera, setShowCamera] = useState(false)
+const [cameraStream, setCameraStream] = useState(null)
+const videoRef = React.useRef(null)
+const canvasRef = React.useRef(null)
 
     const categories = [
         { id: 'all', label: 'All' },
@@ -282,7 +287,63 @@ const OutfitMatchPage = () => {
         setError(null)
         setAnalysisStep('')
     }
+const openCamera = async () => {
+    try {
+        // Check if camera API is available
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setError('Camera not supported on this connection. Please use HTTPS or localhost.')
+            return
+        }
 
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'environment' } 
+        })
+        setCameraStream(stream)
+        setShowCamera(true)
+        setTimeout(() => {
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream
+            }
+        }, 100)
+    } catch (err) {
+        console.error('Camera error:', err)
+        if (err.name === 'NotAllowedError') {
+            setError('Camera permission denied. Please allow camera access in your browser settings.')
+        } else if (err.name === 'NotFoundError') {
+            setError('No camera found on this device.')
+        } else {
+            setError('Camera not available. Try using HTTPS or upload a photo instead.')
+        }
+    }
+}
+
+const closeCamera = () => {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop())
+        setCameraStream(null)
+    }
+    setShowCamera(false)
+}
+
+const capturePhoto = () => {
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    if (!video || !canvas) return
+
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(video, 0, 0)
+
+    canvas.toBlob(async (blob) => {
+        const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' })
+        const imageUrl = URL.createObjectURL(blob)
+        setUploadedImage(imageUrl)
+        setUploadedFile(file)
+        closeCamera()
+        await analyzeImage(file)
+    }, 'image/jpeg', 0.9)
+}
     return (
         <div className="outfit-page">
             <div className="outfit-bg-gradient" />
@@ -345,23 +406,28 @@ const OutfitMatchPage = () => {
                                 transition={{ duration: 0.5 }}
                             >
                                 {!uploadedImage ? (
-                                    <label className="upload-area">
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleImageUpload}
-                                            hidden
-                                        />
-                                        <div className="upload-icon">
-                                            <FiCamera />
-                                        </div>
-                                        <h3>Upload Your Photo</h3>
-                                        <p>Drag and drop or click to upload</p>
-                                        <span className="upload-hint">Supports JPG, PNG, WebP up to 10MB</span>
-                                        <div className="ai-detect-badge">
-                                            <FiCpu /> TensorFlow.js + MobileNet
-                                        </div>
-                                    </label>
+    <>
+        <label className="upload-area">
+            <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                hidden
+            />
+            <div className="upload-icon">
+                <FiUpload />
+            </div>
+            <h3>Upload Your Photo</h3>
+            <p>Drag and drop or click to upload</p>
+            <span className="upload-hint">Supports JPG, PNG, WebP up to 10MB</span>
+            <div className="ai-detect-badge">
+                <FiCpu /> TensorFlow.js + MobileNet
+            </div>
+        </label>
+        <button className="camera-btn" onClick={openCamera}>
+            <FiCamera /> Use Camera
+        </button>
+    </>
                                 ) : (
                                     <div className="uploaded-preview">
                                         <img src={uploadedImage} alt="Uploaded" />
@@ -380,7 +446,27 @@ const OutfitMatchPage = () => {
                                     </div>
                                 )}
                             </motion.div>
-
+{/* Camera Modal */}
+                            {showCamera && (
+                                <div className="camera-modal-overlay">
+                                    <div className="camera-modal">
+                                        <button className="camera-close-btn" onClick={closeCamera}>
+                                            <FiX />
+                                        </button>
+                                        <h3><FiCamera /> Take a Photo</h3>
+                                        <video
+                                            ref={videoRef}
+                                            autoPlay
+                                            playsInline
+                                            style={{ width: '100%', borderRadius: '12px' }}
+                                        />
+                                        <canvas ref={canvasRef} style={{ display: 'none' }} />
+                                        <button className="capture-btn" onClick={capturePhoto}>
+                                            📸 Capture
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             {uploadedImage && !isAnalyzing && analysis && (
                                 <motion.div
                                     className="analysis-result"

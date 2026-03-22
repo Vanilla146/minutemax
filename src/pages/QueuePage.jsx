@@ -158,11 +158,11 @@ const QueuePage = () => {
             const queueOpt = queueOptions.find(q => q.type === status.queue.queue_type)
             console.log('QUEUE OPT FOUND:', queueOpt)
             setSelectedQueue({
-                ...queueOpt,
-                id: status.queue.id,
-                token: status.queue.token,
-                peopleInQueue: status.queue.peopleAhead
-            })
+    ...queueOpt,
+    id: status.queue.id,
+    token: status.queue.token,
+    peopleInQueue: status.queue.totalInQueue
+})
         }
     } catch (err) {
         console.log('Could not check queue status')
@@ -333,7 +333,7 @@ const refreshQueue = async () => {
 }))
 setSelectedQueue(prev => ({
     ...prev,
-    peopleInQueue: status.queue.peopleAhead
+    peopleInQueue: status.queue.totalInQueue
 }))
             }
         } else {
