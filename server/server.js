@@ -13,8 +13,8 @@ import nodemailer from 'nodemailer'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
 const app = express()
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000
 const JWT_SECRET = 'minutemax_secret_key_2024'
 
@@ -293,7 +293,7 @@ const fetchAndStoreProducts = async (connection) => {
                 const stockQty = Math.floor(Math.random() * 50) + 10
 
                 await connection.query(
-                    `INSERT INTO products (name, description, category, sub_category, price, original_price, image_url, color, size, brand, in_stock, stock_quantity, store_id) 
+                    `INSERT INTO products (name, description, category, sub_category, price, original_price, image_url, color, size, brand, in_stock, stock_quantity, store_id)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE, ?, 1)`,
                     [
                         product.title,
@@ -412,7 +412,7 @@ position INT NOT NULL,
         // Add notified_at column if it doesn't exist (for existing databases)
         try {
             const [columns] = await connection.query(`
-                SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+                SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE TABLE_SCHEMA = 'minutemax' AND TABLE_NAME = 'queues' AND COLUMN_NAME = 'notified_at'
             `)
             if (columns.length === 0) {
@@ -449,7 +449,7 @@ position INT NOT NULL,
         // Add gender column if it doesn't exist (for existing databases)
         try {
             const [columns] = await connection.query(`
-                SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+                SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE TABLE_SCHEMA = 'minutemax' AND TABLE_NAME = 'products' AND COLUMN_NAME = 'gender'
             `)
             if (columns.length === 0) {
@@ -728,7 +728,7 @@ app.put('/api/auth/profile', authMiddleware, upload.single('avatar'), async (req
 app.get('/api/stores', async (req, res) => {
     try {
         const [stores] = await pool.query(`
-      SELECT s.*, 
+      SELECT s.*,
         (SELECT COUNT(*) FROM queues WHERE store_id = s.id AND status = 'waiting' AND queue_type = 'checkout') as checkout_queue,
         (SELECT COUNT(*) FROM queues WHERE store_id = s.id AND status = 'waiting' AND queue_type = 'fitting_room') as fitting_queue
       FROM stores s
@@ -744,7 +744,7 @@ app.get('/api/stores', async (req, res) => {
 app.get('/api/store', async (req, res) => {
     try {
         const [stores] = await pool.query(`
-      SELECT s.*, 
+      SELECT s.*,
         (SELECT COUNT(*) FROM queues WHERE store_id = s.id AND status = 'waiting' AND queue_type = 'checkout') as cashier_queue,
         (SELECT COUNT(*) FROM queues WHERE store_id = s.id AND status = 'waiting' AND queue_type = 'fitting_room') as fitting_queue
       FROM stores s
@@ -812,8 +812,8 @@ app.get('/api/queue/status', async (req, res) => {
 
         const [queues] = await pool.query(`
       SELECT q.*, u.name as user_name, u.phone as user_phone
-      FROM queues q 
-      LEFT JOIN users u ON q.user_id = u.id 
+      FROM queues q
+      LEFT JOIN users u ON q.user_id = u.id
       WHERE q.store_id = ? AND q.status = 'waiting'
       ORDER BY q.position
     `, [storeId])
@@ -996,8 +996,8 @@ app.get('/api/queues/my-status', authMiddleware, async (req, res) => {
 
         const [queues] = await pool.query(`
       SELECT q.*, s.name as store_name, s.address as store_address
-      FROM queues q 
-      JOIN stores s ON q.store_id = s.id 
+      FROM queues q
+      JOIN stores s ON q.store_id = s.id
       WHERE q.user_id = ? AND q.status = 'waiting'
     `, [userId])
 
@@ -1042,9 +1042,9 @@ app.get('/api/queues/:storeId', async (req, res) => {
         const { storeId } = req.params
 
         const [queues] = await pool.query(`
-      SELECT q.*, u.name as user_name 
-      FROM queues q 
-      LEFT JOIN users u ON q.user_id = u.id 
+      SELECT q.*, u.name as user_name
+      FROM queues q
+      LEFT JOIN users u ON q.user_id = u.id
       WHERE q.store_id = ? AND q.status = 'waiting'
       ORDER BY q.position
     `, [storeId])
@@ -1155,9 +1155,9 @@ app.post('/api/queues/leave', optionalAuth, async (req, res) => {
 app.get('/api/queues/history', authMiddleware, async (req, res) => {
     try {
         const [history] = await pool.query(`
-      SELECT q.*, s.name as store_name 
-      FROM queues q 
-      JOIN stores s ON q.store_id = s.id 
+      SELECT q.*, s.name as store_name
+      FROM queues q
+      JOIN stores s ON q.store_id = s.id
       WHERE q.user_id = ? AND q.status IN ('completed', 'cancelled')
       ORDER BY q.joined_at DESC
       LIMIT 20
@@ -1176,7 +1176,7 @@ app.post('/api/queues/advance/:storeId/:queueType', async (req, res) => {
 
         // Get the first person in queue
         const [firstInQueue] = await pool.query(`
-      SELECT * FROM queues 
+      SELECT * FROM queues
       WHERE store_id = ? AND queue_type = ? AND status = 'waiting'
       ORDER BY position LIMIT 1
     `, [storeId, queueType])
@@ -1416,8 +1416,8 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
 
         // Get products with intelligent scoring
         const [products] = await pool.query(`
-            SELECT p.*, 
-                CASE 
+            SELECT p.*,
+                CASE
                     WHEN color IN (${detectedColors.map(c => `'${c}'`).join(',')}) THEN FLOOR(92 + RAND() * 8)
                     WHEN ${colorConditions} THEN FLOOR(82 + RAND() * 12)
                     ELSE FLOOR(70 + RAND() * 15)
@@ -1428,14 +1428,14 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
                     ELSE 'Style Complement'
                 END as match_reason
             FROM products p
-            WHERE p.in_stock = TRUE 
+            WHERE p.in_stock = TRUE
               AND (p.gender = ? OR p.gender = 'unisex')
-            ORDER BY 
+            ORDER BY
                 CASE WHEN p.gender = ? THEN 0 ELSE 1 END,
                 CASE WHEN color IN (${detectedColors.map(c => `'${c}'`).join(',')}) THEN 0
                      WHEN ${colorConditions} THEN 1
                      ELSE 2 END,
-                RAND() 
+                RAND()
             LIMIT 12
         `, [detectedGender, detectedGender])
 
@@ -1454,7 +1454,7 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
         let matchId = null
         if (req.userId) {
             const [result] = await pool.query(
-                `INSERT INTO outfit_matches (user_id, uploaded_image, detected_colors, detected_style, detected_gender, matched_products) 
+                `INSERT INTO outfit_matches (user_id, uploaded_image, detected_colors, detected_style, detected_gender, matched_products)
                  VALUES (?, ?, ?, ?, ?, ?)`,
                 [
                     req.userId,
@@ -1507,9 +1507,9 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
 app.get('/api/outfit-match/history', authMiddleware, async (req, res) => {
     try {
         const [matches] = await pool.query(`
-      SELECT * FROM outfit_matches 
-      WHERE user_id = ? 
-      ORDER BY created_at DESC 
+      SELECT * FROM outfit_matches
+      WHERE user_id = ?
+      ORDER BY created_at DESC
       LIMIT 20
     `, [req.userId])
 
@@ -2006,7 +2006,7 @@ app.listen(PORT, '0.0.0.0', async () => {
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
   `)
-    await initializeDatabase()
+    //await initializeDatabase()
 })
 
 export default app
