@@ -31,8 +31,8 @@ const EMAIL_CONFIG = {
     port: 587,
     secure: false, // Use TLS
     auth: {
-        user: 'minutemaxshopping@gmail.com', // Replace with your Gmail
-        pass: 'gtas dchy wiqe wakn' // Replace with your App Password (16 characters)
+        user: 'vanulvilhan146@gmail.com', // Replace with your Gmail
+        pass: 'hdzu yzkx taug ewky' // Replace with your App Password (16 characters)
     }
 }
 
