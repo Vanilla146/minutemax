@@ -1,10 +1,5 @@
 /**
- * Staff Dashboard
- * Features:
- * - Call next customer by number
- * - Seamless handoff to POS at checkout
- * - Queue analytics (peak times, wait avg)
- * - Real-time queue management
+ * Staff Dashboard - Redesigned
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -13,18 +8,19 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     FiUsers, FiClock, FiPhone, FiCheckCircle, FiShoppingCart,
     FiTrendingUp, FiBarChart2, FiRefreshCw, FiBell, FiDollarSign,
-    FiAlertCircle, FiPrinter, FiHash, FiActivity, FiX, FiLoader
+    FiAlertCircle, FiPrinter, FiHash, FiActivity, FiX, FiLoader,
+    FiZap, FiArrowUp, FiArrowDown, FiMinus
 } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
 import { queueService } from '../../services/api'
 import './StaffDashboard.css'
 
 const StaffDashboard = () => {
-    // ALL HOOKS MUST COME FIRST - before any conditional returns
     const { user, isAuthenticated, loading: authLoading } = useAuth()
     const [activeQueue, setActiveQueue] = useState('fitting_room')
     const [queueData, setQueueData] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [refreshing, setRefreshing] = useState(false)
     const [calledCustomer, setCalledCustomer] = useState({ fitting_room: null, cashier: null })
     const [notification, setNotification] = useState(null)
     const [analytics, setAnalytics] = useState({
@@ -35,7 +31,6 @@ const StaffDashboard = () => {
     })
     const [posHandoff, setPosHandoff] = useState(null)
 
-    // Calculate queue analytics
     const calculateAnalytics = useCallback((data) => {
         const peakHours = [
             { hour: 10, load: 'medium', count: 12 },
@@ -49,7 +44,6 @@ const StaffDashboard = () => {
             { hour: 18, load: 'high', count: 32 },
             { hour: 19, load: 'medium', count: 20 }
         ]
-
         const totalInQueue = (data?.fitting_room?.count || 0) + (data?.cashier?.count || 0)
         let currentLoad = 'low'
         if (totalInQueue > 15) currentLoad = 'peak'
@@ -58,39 +52,35 @@ const StaffDashboard = () => {
 
         setAnalytics({
             peakHours,
-            avgWaitTime: Math.round((data?.fitting_room?.estimatedWait || 0 + data?.cashier?.estimatedWait || 0) / 2),
+            avgWaitTime: Math.round(((data?.fitting_room?.estimatedWait || 0) + (data?.cashier?.estimatedWait || 0)) / 2),
             servedToday: 47,
             currentLoad
         })
     }, [])
 
-    // Load queue data
-    const loadQueues = useCallback(async () => {
+    const loadQueues = useCallback(async (showRefresh = false) => {
+        if (showRefresh) setRefreshing(true)
         try {
             const data = await queueService.getStatus()
             setQueueData(data)
             calculateAnalytics(data)
         } catch (err) {
-            console.log('Could not load queues')
-            // Mock data for demo
             const mockData = {
                 fitting_room: {
-                    count: 4,
-                    estimatedWait: 32,
+                    count: 4, estimatedWait: 32,
                     queue: [
-                        { id: 1, position: 1, token: 'FR-001', user_name: 'John Doe', phone: '0771234567', joined_at: new Date(Date.now() - 15 * 60000), items: ['Blue Jeans', 'White Shirt'] },
-                        { id: 2, position: 2, token: 'FR-002', user_name: 'Jane Smith', phone: '0779876543', joined_at: new Date(Date.now() - 10 * 60000), items: ['Black Dress'] },
-                        { id: 3, position: 3, token: 'FR-003', user_name: 'Mike Wilson', phone: '0771112233', joined_at: new Date(Date.now() - 5 * 60000), items: ['Blazer', 'Pants'] },
-                        { id: 4, position: 4, token: 'FR-004', user_name: 'Sarah Johnson', joined_at: new Date(Date.now() - 2 * 60000), items: ['Skirt'] }
+                        { id: 1, position: 1, token: 'F001', user_name: 'John Doe', phone: '0771234567', joined_at: new Date(Date.now() - 15 * 60000), items: ['Blue Jeans', 'White Shirt'] },
+                        { id: 2, position: 2, token: 'F002', user_name: 'Jane Smith', phone: '0779876543', joined_at: new Date(Date.now() - 10 * 60000), items: ['Black Dress'] },
+                        { id: 3, position: 3, token: 'F003', user_name: 'Mike Wilson', joined_at: new Date(Date.now() - 5 * 60000), items: ['Blazer'] },
+                        { id: 4, position: 4, token: 'F004', user_name: 'Sarah Johnson', joined_at: new Date(Date.now() - 2 * 60000), items: ['Skirt'] }
                     ]
                 },
                 cashier: {
-                    count: 6,
-                    estimatedWait: 18,
+                    count: 3, estimatedWait: 9,
                     queue: [
-                        { id: 5, position: 1, token: 'CH-001', user_name: 'Emma Brown', phone: '0773334455', joined_at: new Date(Date.now() - 8 * 60000), total: 15500 },
-                        { id: 6, position: 2, token: 'CH-002', user_name: 'David Lee', joined_at: new Date(Date.now() - 6 * 60000), total: 8900 },
-                        { id: 7, position: 3, token: 'CH-003', user_name: 'Guest', joined_at: new Date(Date.now() - 4 * 60000), total: 4500 }
+                        { id: 5, position: 1, token: 'C001', user_name: 'Emma Brown', phone: '0773334455', joined_at: new Date(Date.now() - 8 * 60000), total: 15500 },
+                        { id: 6, position: 2, token: 'C002', user_name: 'David Lee', joined_at: new Date(Date.now() - 6 * 60000), total: 8900 },
+                        { id: 7, position: 3, token: 'C003', user_name: 'Guest', joined_at: new Date(Date.now() - 4 * 60000), total: 4500 }
                     ]
                 }
             }
@@ -98,116 +88,62 @@ const StaffDashboard = () => {
             calculateAnalytics(mockData)
         } finally {
             setLoading(false)
+            setRefreshing(false)
         }
     }, [calculateAnalytics])
 
     useEffect(() => {
         loadQueues()
-        const interval = setInterval(loadQueues, 5000)
+        const interval = setInterval(() => loadQueues(), 10000)
         return () => clearInterval(interval)
     }, [loadQueues])
 
-    // Role-based access control - AFTER all hooks
-    if (authLoading) {
-        return (
-            <div className="staff-dashboard">
-                <div className="loading-state">
-                    <FiLoader className="spinner" />
-                    <p>Loading...</p>
-                </div>
-            </div>
-        )
-    }
-
-    // Redirect non-authenticated users
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />
-    }
-
-    // Only staff and admin can access this dashboard
+    if (authLoading) return <div className="staff-dashboard"><div className="loading-state"><FiLoader className="spinner" /><p>Loading...</p></div></div>
+    if (!isAuthenticated) return <Navigate to="/login" replace />
     const role = user?.role?.toLowerCase()
-    if (role !== 'staff' && role !== 'admin') {
-        return <Navigate to="/dashboard" replace />
-    }
+    if (role !== 'staff' && role !== 'admin') return <Navigate to="/dashboard" replace />
 
-    // Call next customer
     const handleCallNext = async (queueType) => {
         const queue = queueData?.[queueType]?.queue
-        if (!queue || queue.length === 0) {
-            showNotification('info', 'Queue is empty')
-            return
-        }
-
+        if (!queue || queue.length === 0) { showNotification('info', 'Queue is empty'); return }
         const nextCustomer = queue[0]
-
-        try {
-            await queueService.callNext(queueType)
-        } catch (err) {
-            // Continue with mock call
-        }
-
+        try { await queueService.callNext(queueType) } catch (err) {}
         setCalledCustomer(prev => ({ ...prev, [queueType]: nextCustomer }))
-        showNotification('success', `Calling ${nextCustomer.user_name} - Token ${nextCustomer.token}`)
-
-        // Remove from queue display
+        showNotification('success', `Calling ${nextCustomer.user_name} — Token ${nextCustomer.token}`)
         setQueueData(prev => ({
             ...prev,
-            [queueType]: {
-                ...prev[queueType],
-                count: prev[queueType].count - 1,
-                queue: prev[queueType].queue.slice(1)
-            }
+            [queueType]: { ...prev[queueType], count: prev[queueType].count - 1, queue: prev[queueType].queue.slice(1) }
         }))
     }
 
-    // Complete service
     const handleComplete = async (queueType) => {
         const customer = calledCustomer[queueType]
         if (!customer) return
-
-        try {
-            await queueService.complete(customer.id)
-        } catch (err) {
-            console.log('API call failed, continuing')
-        }
-
+        try { await queueService.complete(customer.id) } catch (err) {}
         setCalledCustomer(prev => ({ ...prev, [queueType]: null }))
         showNotification('success', 'Service completed!')
         setAnalytics(prev => ({ ...prev, servedToday: prev.servedToday + 1 }))
     }
 
-    // Handoff to POS
     const handlePOSHandoff = (customer) => {
-        setPosHandoff({
-            customer,
-            items: customer.items || [],
-            total: customer.total || 0,
-            timestamp: new Date()
-        })
+        setPosHandoff({ customer, items: customer.items || [], total: customer.total || 0, timestamp: new Date() })
     }
 
-    // Complete POS handoff
     const completePOSHandoff = () => {
         if (calledCustomer.fitting_room) {
-            // Move customer to checkout queue after fitting room
             showNotification('success', `${calledCustomer.fitting_room.user_name} moved to checkout queue`)
             setCalledCustomer(prev => ({ ...prev, fitting_room: null }))
         }
         setPosHandoff(null)
     }
 
-    // Show notification
     const showNotification = (type, message) => {
         setNotification({ type, message })
         setTimeout(() => setNotification(null), 4000)
     }
 
-    // Get wait time in minutes
-    const getWaitTime = (joinedAt) => {
-        return Math.round((Date.now() - new Date(joinedAt).getTime()) / 60000)
-    }
+    const getWaitTime = (joinedAt) => Math.round((Date.now() - new Date(joinedAt).getTime()) / 60000)
 
-    // Get load color
     const getLoadColor = (load) => {
         switch (load) {
             case 'peak': return '#ef4444'
@@ -217,44 +153,35 @@ const StaffDashboard = () => {
         }
     }
 
-    if (loading) {
-        return (
-            <div className="staff-dashboard">
-                <div className="loading-state">
-                    <FiRefreshCw className="spinner" />
-                    <p>Loading dashboard...</p>
-                </div>
-            </div>
-        )
+    const getLoadBadgeClass = (load) => {
+        switch (load) {
+            case 'peak': return 'load-peak'
+            case 'high': return 'load-high'
+            case 'medium': return 'load-medium'
+            default: return 'load-low'
+        }
     }
+
+    const currentQueue = queueData?.[activeQueue]
+    const maxBarCount = Math.max(...analytics.peakHours.map(h => h.count), 1)
+
+    if (loading) return (
+        <div className="staff-dashboard">
+            <div className="loading-state"><FiRefreshCw className="spinner" /><p>Loading dashboard...</p></div>
+        </div>
+    )
 
     return (
         <div className="staff-dashboard">
-            {/* Header */}
-            <header className="staff-header">
-                <div className="header-left">
-                    <h1>Staff Dashboard</h1>
-                    <span className="staff-name">Welcome, {user?.name || 'Staff'}</span>
-                </div>
-                <div className="header-right">
-                    <div className={`current-load ${analytics.currentLoad}`}>
-                        <FiActivity />
-                        <span>{analytics.currentLoad.toUpperCase()} LOAD</span>
-                    </div>
-                    <button className="refresh-btn" onClick={loadQueues}>
-                        <FiRefreshCw /> Refresh
-                    </button>
-                </div>
-            </header>
 
-            {/* Notification */}
+            {/* Notification Toast */}
             <AnimatePresence>
                 {notification && (
                     <motion.div
-                        className={`staff-notification ${notification.type}`}
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
+                        className={`staff-toast ${notification.type}`}
+                        initial={{ opacity: 0, y: -60, x: '-50%' }}
+                        animate={{ opacity: 1, y: 0, x: '-50%' }}
+                        exit={{ opacity: 0, y: -60, x: '-50%' }}
                     >
                         {notification.type === 'success' && <FiCheckCircle />}
                         {notification.type === 'error' && <FiAlertCircle />}
@@ -265,50 +192,56 @@ const StaffDashboard = () => {
                 )}
             </AnimatePresence>
 
-            {/* Quick Stats */}
-            <div className="staff-stats">
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: '#f093fb' }}>
-                        <FiUsers />
+            {/* Header */}
+            <header className="staff-header">
+                <div className="header-left">
+                    <div className="header-title">
+                        <h1>Staff Dashboard</h1>
+                        <span className={`load-badge ${getLoadBadgeClass(analytics.currentLoad)}`}>
+                            <FiActivity /> {analytics.currentLoad.toUpperCase()} LOAD
+                        </span>
                     </div>
-                    <div className="stat-info">
-                        <span className="stat-value">{queueData?.fitting_room?.count || 0}</span>
-                        <span className="stat-label">Fitting Room Queue</span>
-                    </div>
+                    <p>Welcome back, <strong>{user?.name || 'Staff'}</strong> · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: '#667eea' }}>
-                        <FiShoppingCart />
-                    </div>
-                    <div className="stat-info">
-                        <span className="stat-value">{queueData?.cashier?.count || 0}</span>
-                        <span className="stat-label">Cashier Queue</span>
-                    </div>
+                <div className="header-right">
+                    <button className={`refresh-btn ${refreshing ? 'spinning' : ''}`} onClick={() => loadQueues(true)}>
+                        <FiRefreshCw /> {refreshing ? 'Refreshing...' : 'Refresh'}
+                    </button>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: '#10b981' }}>
-                        <FiCheckCircle />
-                    </div>
-                    <div className="stat-info">
-                        <span className="stat-value">{analytics.servedToday}</span>
-                        <span className="stat-label">Served Today</span>
-                    </div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: '#f59e0b' }}>
-                        <FiClock />
-                    </div>
-                    <div className="stat-info">
-                        <span className="stat-value">{analytics.avgWaitTime}m</span>
-                        <span className="stat-label">Avg Wait Time</span>
-                    </div>
-                </div>
+            </header>
+
+            {/* KPI Stats Row */}
+            <div className="kpi-row">
+                {[
+                    { icon: <FiUsers />, value: queueData?.fitting_room?.count || 0, label: 'Fitting Room', sub: `~${queueData?.fitting_room?.estimatedWait || 0} min wait`, color: '#f093fb', bg: '#fdf4ff' },
+                    { icon: <FiShoppingCart />, value: queueData?.cashier?.count || 0, label: 'Cashier Queue', sub: `~${queueData?.cashier?.estimatedWait || 0} min wait`, color: '#667eea', bg: '#f0f3ff' },
+                    { icon: <FiCheckCircle />, value: analytics.servedToday, label: 'Served Today', sub: '+12% vs yesterday', color: '#10b981', bg: '#f0fdf4' },
+                    { icon: <FiClock />, value: `${analytics.avgWaitTime}m`, label: 'Avg Wait', sub: 'Target: < 10 min', color: '#f59e0b', bg: '#fffbeb' },
+                    { icon: <FiDollarSign />, value: 'Rs.485K', label: 'Sales Today', sub: '92% satisfaction', color: '#ef4444', bg: '#fef2f2' },
+                ].map((kpi, i) => (
+                    <motion.div
+                        key={i}
+                        className="kpi-card"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.08 }}
+                    >
+                        <div className="kpi-icon" style={{ background: kpi.bg, color: kpi.color }}>{kpi.icon}</div>
+                        <div className="kpi-info">
+                            <div className="kpi-value" style={{ color: kpi.color }}>{kpi.value}</div>
+                            <div className="kpi-label">{kpi.label}</div>
+                            <div className="kpi-sub">{kpi.sub}</div>
+                        </div>
+                    </motion.div>
+                ))}
             </div>
 
-            {/* Main Content Grid */}
+            {/* Main Grid */}
             <div className="staff-main-grid">
-                {/* Queue Management */}
-                <div className="queue-section">
+
+                {/* Left: Queue Management */}
+                <div className="queue-panel">
+
                     {/* Queue Tabs */}
                     <div className="queue-tabs">
                         <button
@@ -316,208 +249,238 @@ const StaffDashboard = () => {
                             onClick={() => setActiveQueue('fitting_room')}
                         >
                             <FiUsers />
-                            Fitting Room ({queueData?.fitting_room?.count || 0})
+                            <span>Fitting Room</span>
+                            <span className="tab-count">{queueData?.fitting_room?.count || 0}</span>
                         </button>
                         <button
                             className={`queue-tab ${activeQueue === 'cashier' ? 'active' : ''}`}
                             onClick={() => setActiveQueue('cashier')}
                         >
                             <FiShoppingCart />
-                            Cashier ({queueData?.cashier?.count || 0})
+                            <span>Cashier</span>
+                            <span className="tab-count">{queueData?.cashier?.count || 0}</span>
                         </button>
                     </div>
 
-                    {/* Currently Serving */}
-                    <div className="currently-serving">
-                        <h3>
-                            <FiBell /> Now Serving
-                        </h3>
-                        {calledCustomer[activeQueue] ? (
-                            <motion.div
-                                className="serving-card"
-                                initial={{ scale: 0.95 }}
-                                animate={{ scale: 1 }}
-                            >
-                                <div className="serving-token">
-                                    {calledCustomer[activeQueue].token}
-                                </div>
-                                <div className="serving-info">
-                                    <h4>{calledCustomer[activeQueue].user_name}</h4>
-                                    {calledCustomer[activeQueue].phone && (
-                                        <p><FiPhone /> {calledCustomer[activeQueue].phone}</p>
-                                    )}
-                                    {calledCustomer[activeQueue].items && (
-                                        <p className="items-list">
-                                            Items: {calledCustomer[activeQueue].items.join(', ')}
-                                        </p>
-                                    )}
-                                </div>
-                                <div className="serving-actions">
-                                    <button
-                                        className="btn btn-success"
-                                        onClick={() => handleComplete(activeQueue)}
-                                    >
-                                        <FiCheckCircle /> Complete
-                                    </button>
-                                    {activeQueue === 'fitting_room' && (
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={() => handlePOSHandoff(calledCustomer[activeQueue])}
-                                        >
-                                            <FiShoppingCart /> Send to Checkout
-                                        </button>
-                                    )}
-                                </div>
-                            </motion.div>
-                        ) : (
-                            <div className="no-serving">
-                                <p>No customer being served</p>
-                                <button
-                                    className="btn btn-primary btn-lg call-btn"
-                                    onClick={() => handleCallNext(activeQueue)}
-                                    disabled={!queueData?.[activeQueue]?.queue?.length}
+                    {/* Now Serving */}
+                    <div className="serving-section">
+                        <div className="section-label-row">
+                            <span className="section-label"><FiBell /> NOW SERVING</span>
+                            {!calledCustomer[activeQueue] && (
+                                <span className="queue-wait-info">~{currentQueue?.estimatedWait || 0} min total wait</span>
+                            )}
+                        </div>
+
+                        <AnimatePresence mode="wait">
+                            {calledCustomer[activeQueue] ? (
+                                <motion.div
+                                    key="serving"
+                                    className="serving-card active"
+                                    initial={{ opacity: 0, scale: 0.97 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.97 }}
                                 >
-                                    <FiHash /> Call Next Customer
-                                </button>
-                            </div>
-                        )}
+                                    <div className="serving-left">
+                                        <div className="serving-token">{calledCustomer[activeQueue].token}</div>
+                                        <div className="serving-pulse" />
+                                    </div>
+                                    <div className="serving-info">
+                                        <h4>{calledCustomer[activeQueue].user_name}</h4>
+                                        {calledCustomer[activeQueue].phone && (
+                                            <p><FiPhone /> {calledCustomer[activeQueue].phone}</p>
+                                        )}
+                                        {calledCustomer[activeQueue].items?.length > 0 && (
+                                            <p className="items-list">🛍 {calledCustomer[activeQueue].items.join(', ')}</p>
+                                        )}
+                                    </div>
+                                    <div className="serving-actions">
+                                        <button className="btn-complete" onClick={() => handleComplete(activeQueue)}>
+                                            <FiCheckCircle /> Complete
+                                        </button>
+                                        {activeQueue === 'fitting_room' && (
+                                            <button className="btn-handoff" onClick={() => handlePOSHandoff(calledCustomer[activeQueue])}>
+                                                <FiShoppingCart /> Checkout
+                                            </button>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="empty-serving"
+                                    className="serving-card empty"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                >
+                                    <p>No customer being served</p>
+                                    <button
+    className="btn-call-next"
+    onClick={() => handleCallNext(activeQueue)}
+    disabled={!currentQueue?.queue?.length || !!calledCustomer[activeQueue]}
+>
+                                        <FiHash /> Call Next Customer
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    {/* Queue List */}
-                    <div className="queue-list-section">
-                        <div className="queue-list-header">
-                            <h3>Waiting Customers</h3>
-                            <span className="wait-estimate">
-                                ~{queueData?.[activeQueue]?.estimatedWait || 0} min total wait
-                            </span>
+                    {/* Waiting List */}
+                    <div className="waiting-section">
+                        <div className="section-label-row">
+                            <span className="section-label"><FiUsers /> WAITING CUSTOMERS</span>
+                            <span className="queue-count-badge">{currentQueue?.count || 0} in queue</span>
                         </div>
                         <div className="queue-list">
-                            {queueData?.[activeQueue]?.queue?.length > 0 ? (
-                                queueData[activeQueue].queue.map((customer, index) => (
+                            <AnimatePresence>
+                                {currentQueue?.queue?.length > 0 ? currentQueue.queue.map((customer, index) => (
                                     <motion.div
                                         key={customer.id}
-                                        className={`queue-item ${index === 0 ? 'next' : ''}`}
+                                        className={`queue-item ${index === 0 ? 'next-up' : ''}`}
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.05 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                        transition={{ delay: index * 0.04 }}
                                     >
-                                        <div className="queue-token">{customer.token}</div>
+                                        <div className="queue-pos-badge" style={{ background: index === 0 ? '#171717' : '#f5f5f5', color: index === 0 ? '#fff' : '#676869' }}>
+                                            #{customer.position}
+                                        </div>
+                                        <div className="queue-token-small">{customer.token}</div>
                                         <div className="queue-details">
-                                            <span className="queue-name">{customer.user_name}</span>
-                                            <span className="queue-wait">
-                                                <FiClock /> Waiting {getWaitTime(customer.joined_at)}m
-                                            </span>
+                                            <span className="queue-name">{customer.user_name || 'Guest'}</span>
+                                            <span className="queue-wait-time"><FiClock /> {getWaitTime(customer.joined_at)}m ago</span>
                                         </div>
                                         {index === 0 && (
                                             <button
-                                                className="call-single-btn"
-                                                onClick={() => handleCallNext(activeQueue)}
-                                            >
-                                                Call
-                                            </button>
+    className="btn-call-inline"
+    onClick={() => handleCallNext(activeQueue)}
+    disabled={!!calledCustomer[activeQueue]}
+    style={{ opacity: calledCustomer[activeQueue] ? 0.4 : 1, cursor: calledCustomer[activeQueue] ? 'not-allowed' : 'pointer' }}
+>
+    Call
+</button>
                                         )}
                                     </motion.div>
-                                ))
-                            ) : (
-                                <div className="queue-empty">
-                                    <FiCheckCircle />
-                                    <p>No customers waiting</p>
-                                </div>
-                            )}
+                                )) : (
+                                    <div className="queue-empty-state">
+                                        <FiCheckCircle />
+                                        <p>All clear — no customers waiting</p>
+                                    </div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>
 
-                {/* Analytics Panel */}
-                <div className="analytics-section">
-                    <h3><FiBarChart2 /> Queue Analytics</h3>
+                {/* Right: Analytics */}
+                <div className="analytics-panel">
 
-                    {/* Peak Hours Chart */}
+                    {/* Peak Hours Bar Chart */}
                     <div className="analytics-card">
-                        <h4><FiTrendingUp /> Peak Hours Today</h4>
-                        <div className="peak-hours-chart">
-                            {analytics.peakHours.map((hour, index) => (
-                                <div key={index} className="peak-bar-container">
-                                    <div
-                                        className="peak-bar"
-                                        style={{
-                                            height: `${(hour.count / 40) * 100}%`,
-                                            background: getLoadColor(hour.load)
-                                        }}
-                                    />
-                                    <span className="peak-hour">{hour.hour}:00</span>
+                        <div className="analytics-card-header">
+                            <div className="analytics-card-title">
+                                <FiTrendingUp />
+                                <span>Peak Hours Today</span>
+                            </div>
+                            <button className="mini-refresh-btn" onClick={() => loadQueues(true)}>
+                                <FiRefreshCw />
+                            </button>
+                        </div>
+                        <div className="peak-chart">
+                            {analytics.peakHours.map((hour, i) => (
+                                <div key={i} className="peak-col">
+                                    <div className="peak-bar-wrap">
+                                        <div
+                                            className="peak-bar-fill"
+                                            style={{
+                                                height: `${(hour.count / maxBarCount) * 100}%`,
+                                                background: getLoadColor(hour.load)
+                                            }}
+                                            title={`${hour.count} customers`}
+                                        />
+                                    </div>
+                                    <span className="peak-hour-label">{hour.hour}</span>
                                 </div>
                             ))}
                         </div>
                         <div className="peak-legend">
-                            <span><i style={{ background: '#10b981' }}></i> Low</span>
-                            <span><i style={{ background: '#667eea' }}></i> Medium</span>
-                            <span><i style={{ background: '#f59e0b' }}></i> High</span>
-                            <span><i style={{ background: '#ef4444' }}></i> Peak</span>
+                            {[['#10b981', 'Low'], ['#667eea', 'Medium'], ['#f59e0b', 'High'], ['#ef4444', 'Peak']].map(([color, label]) => (
+                                <span key={label} className="legend-item">
+                                    <span className="legend-dot" style={{ background: color }} />
+                                    {label}
+                                </span>
+                            ))}
                         </div>
                     </div>
 
                     {/* Wait Time Stats */}
                     <div className="analytics-card">
-                        <h4><FiClock /> Wait Time Statistics</h4>
-                        <div className="wait-stats">
-                            <div className="wait-stat">
-                                <span className="wait-stat-label">Average Wait</span>
-                                <span className="wait-stat-value">{analytics.avgWaitTime} min</span>
+                        <div className="analytics-card-header">
+                            <div className="analytics-card-title">
+                                <FiClock />
+                                <span>Wait Time Statistics</span>
                             </div>
-                            <div className="wait-stat">
-                                <span className="wait-stat-label">Fitting Room Avg</span>
-                                <span className="wait-stat-value">{queueData?.fitting_room?.estimatedWait || 0} min</span>
-                            </div>
-                            <div className="wait-stat">
-                                <span className="wait-stat-label">Cashier Avg</span>
-                                <span className="wait-stat-value">{queueData?.cashier?.estimatedWait || 0} min</span>
-                            </div>
-                            <div className="wait-stat">
-                                <span className="wait-stat-label">Target</span>
-                                <span className="wait-stat-value success">{"< 10 min"}</span>
-                            </div>
+                            <button className="mini-refresh-btn" onClick={() => loadQueues(true)}>
+                                <FiRefreshCw />
+                            </button>
+                        </div>
+                        <div className="wait-stats-grid">
+                            {[
+                                { label: 'Avg Wait', value: `${analytics.avgWaitTime} min`, icon: <FiMinus />, color: '#667eea' },
+                                { label: 'Fitting Room', value: `${queueData?.fitting_room?.estimatedWait || 0} min`, icon: <FiArrowUp />, color: '#f093fb' },
+                                { label: 'Cashier', value: `${queueData?.cashier?.estimatedWait || 0} min`, icon: <FiArrowDown />, color: '#667eea' },
+                                { label: 'Target', value: '< 10 min', icon: <FiZap />, color: '#10b981' },
+                            ].map((s, i) => (
+                                <div key={i} className="wait-stat-box">
+                                    <div className="wait-stat-icon" style={{ color: s.color }}>{s.icon}</div>
+                                    <div className="wait-stat-value" style={{ color: s.color }}>{s.value}</div>
+                                    <div className="wait-stat-label">{s.label}</div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
                     {/* Performance */}
                     <div className="analytics-card">
-                        <h4><FiActivity /> Today's Performance</h4>
-                        <div className="performance-stats">
-                            <div className="perf-stat">
-                                <div className="perf-value">{analytics.servedToday}</div>
-                                <div className="perf-label">Customers Served</div>
+                        <div className="analytics-card-header">
+                            <div className="analytics-card-title">
+                                <FiActivity />
+                                <span>Today's Performance</span>
                             </div>
-                            <div className="perf-stat">
-                                <div className="perf-value success">92%</div>
-                                <div className="perf-label">Satisfaction Rate</div>
+                            <button className="mini-refresh-btn" onClick={() => loadQueues(true)}>
+                                <FiRefreshCw />
+                            </button>
+                        </div>
+                        <div className="perf-grid">
+                            <div className="perf-main">
+                                <div className="perf-big-value">{analytics.servedToday}</div>
+                                <div className="perf-big-label">Customers Served</div>
+                                <div className="perf-progress-bar">
+                                    <div className="perf-progress-fill" style={{ width: '78%' }} />
+                                </div>
+                                <div className="perf-progress-label">78% of daily target</div>
                             </div>
-                            <div className="perf-stat">
-                                <div className="perf-value">Rs. 485K</div>
-                                <div className="perf-label">Sales Today</div>
+                            <div className="perf-side">
+                                <div className="perf-mini-stat">
+                                    <span className="perf-mini-value" style={{ color: '#10b981' }}>92%</span>
+                                    <span className="perf-mini-label">Satisfaction</span>
+                                </div>
+                                <div className="perf-mini-stat">
+                                    <span className="perf-mini-value" style={{ color: '#667eea' }}>Rs.485K</span>
+                                    <span className="perf-mini-label">Sales Today</span>
+                                </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
 
-            {/* POS Handoff Modal */}
+            {/* POS Modal */}
             <AnimatePresence>
                 {posHandoff && (
-                    <motion.div
-                        className="pos-modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setPosHandoff(null)}
-                    >
-                        <motion.div
-                            className="pos-modal"
-                            initial={{ scale: 0.9, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.9, y: 20 }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
+                    <motion.div className="pos-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPosHandoff(null)}>
+                        <motion.div className="pos-modal" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} onClick={e => e.stopPropagation()}>
                             <div className="pos-modal-header">
                                 <h3><FiDollarSign /> POS Handoff</h3>
                                 <button onClick={() => setPosHandoff(null)}><FiX /></button>
@@ -526,32 +489,17 @@ const StaffDashboard = () => {
                                 <div className="pos-customer-info">
                                     <h4>{posHandoff.customer.user_name}</h4>
                                     <p>Token: {posHandoff.customer.token}</p>
-                                    {posHandoff.customer.phone && (
-                                        <p><FiPhone /> {posHandoff.customer.phone}</p>
-                                    )}
+                                    {posHandoff.customer.phone && <p><FiPhone /> {posHandoff.customer.phone}</p>}
                                 </div>
-
                                 {posHandoff.items.length > 0 && (
                                     <div className="pos-items">
                                         <h5>Items Tried:</h5>
-                                        <ul>
-                                            {posHandoff.items.map((item, index) => (
-                                                <li key={index}>{item}</li>
-                                            ))}
-                                        </ul>
+                                        <ul>{posHandoff.items.map((item, i) => <li key={i}>{item}</li>)}</ul>
                                     </div>
                                 )}
-
                                 <div className="pos-actions">
-                                    <button className="btn btn-secondary" onClick={() => {
-                                        // Print receipt or summary
-                                        showNotification('info', 'Printing customer summary...')
-                                    }}>
-                                        <FiPrinter /> Print Summary
-                                    </button>
-                                    <button className="btn btn-primary" onClick={completePOSHandoff}>
-                                        <FiShoppingCart /> Add to Checkout Queue
-                                    </button>
+                                    <button className="btn btn-secondary" onClick={() => showNotification('info', 'Printing summary...')}><FiPrinter /> Print Summary</button>
+                                    <button className="btn btn-primary" onClick={completePOSHandoff}><FiShoppingCart /> Send to Checkout</button>
                                 </div>
                             </div>
                         </motion.div>
