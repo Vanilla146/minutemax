@@ -1,18 +1,7 @@
 import axios from 'axios'
 
 // Dynamic API URL - uses current host for network access
-const getApiUrl = () => {
-    const currentHost = window.location.hostname
-    // If accessing from localhost, use localhost:5000
-    // If accessing from network IP, use that IP:5000 for API
-    if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-        return 'http://localhost:5000/api'
-    }
-    // For network access (phone scanning QR), use the same host but port 5000
-    return `http://${currentHost}:5000/api`
-}
-
-const API_URL = getApiUrl()
+const API_URL = '/api';
 
 // Create axios instance with default config
 const api = axios.create({
