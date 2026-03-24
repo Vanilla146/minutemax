@@ -5,6 +5,7 @@ import { FiUsers, FiClock, FiCheckCircle, FiAlertCircle, FiHash, FiMapPin, FiBel
 import { QRCodeSVG } from 'qrcode.react'
 import { useTranslation } from 'react-i18next'
 import api, { queueService, storeService } from '../services/api'
+import { getPlayerId } from '../services/oneSignalService'
 import { useAuth } from '../context/AuthContext'
 import VisualQueue from '../components/VisualQueue'
 import './QueuePage.css'
@@ -199,6 +200,32 @@ const QueuePage = () => {
                 message: `You've joined the queue! Token: ${result.queue.token}`
             })
 
+            // Send OneSignal notification + save to notification bar
+try {
+    const playerId = await getPlayerId()
+    if (playerId) {
+        sessionStorage.setItem('osPlayerId', playerId)
+        await api.post('/notify/queue', {
+            playerId,
+            title: '✅ Joined Queue',
+            message: `Your token is ${result.queue.token}. Position #${result.queue.position}`,
+            type: 'success'
+        })
+    }
+    // Also add to in-app notification bar
+    if (window.mmAddNotification) {
+        window.mmAddNotification(
+            '✅ Joined Queue',
+            `Your token is ${result.queue.token}. You are #${result.queue.position} in the ${queueType === 'fitting_room' ? 'Fitting Room' : 'Cashier'} queue.`,
+            'success'
+        )
+    }
+} catch (err) {
+    console.log('Notification error:', err)
+}
+
+            
+
             if (!isAuthenticated) {
     sessionStorage.setItem('guestQueueId', String(result.queue.id))
     sessionStorage.setItem('guestToken', result.queue.token)
@@ -331,6 +358,15 @@ const refreshQueue = async () => {
     position: status.queue.position,
     estimatedWait: status.queue.estimatedWait
 }))
+// Trigger in-app notification for position updates
+if (window.mmAddNotification) {
+    const pos = isAuthenticated ? status.queue.position : response.data.position
+    if (pos === 1) {
+        window.mmAddNotification('🎉 It\'s Your Turn!', 'Please proceed to the counter now.', 'turn')
+    } else if (pos <= 3) {
+        window.mmAddNotification('⏰ Almost Your Turn!', `Only ${pos - 1} ${pos - 1 === 1 ? 'person' : 'people'} ahead of you.`, 'warning')
+    }
+}
 setSelectedQueue(prev => ({
     ...prev,
     peopleInQueue: status.queue.totalInQueue

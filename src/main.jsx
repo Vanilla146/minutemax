@@ -5,6 +5,8 @@ import './index.css'
 
 // Initialize i18n for multi-language support
 import './i18n'
+import { initOneSignal } from './services/oneSignalService'
+initOneSignal()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>

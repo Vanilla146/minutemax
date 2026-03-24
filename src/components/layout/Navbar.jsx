@@ -5,7 +5,9 @@ import { FiMenu, FiX, FiUser, FiLogOut, FiGrid, FiChevronDown, FiSettings } from
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import LanguageSelector from '../LanguageSelector'
+import NotificationBar from '../NotificationBar'
 import './Navbar.css'
+
 
 const Navbar = () => {
     const { t } = useTranslation()
@@ -82,9 +84,10 @@ const Navbar = () => {
 
                 {/* Auth Buttons & Language */}
                 <div className="navbar-actions">
-                    <LanguageSelector variant="compact" />
-                    
-                    {isAuthenticated ? (
+    <LanguageSelector variant="compact" />
+    <NotificationBar />
+    
+    {isAuthenticated ? (
                         <div className="user-profile-dropdown">
                             <button 
                                 className="profile-trigger"
