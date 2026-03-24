@@ -1,3 +1,5 @@
+import dotenv from 'dotenv'
+dotenv.config()
 import express from 'express'
 import cors from 'cors'
 import mysql from 'mysql2/promise'
@@ -1666,7 +1668,7 @@ app.post('/api/notify/queue', async (req, res) => {
         const response = await axios.post(
             'https://onesignal.com/api/v1/notifications',
             {
-                app_id: '65971a38-cb02-47fe-a5c3-12e53a13ecb1',
+                app_id: process.env.ONESIGNAL_APP_ID,
                 include_subscription_ids: [playerId],
                 headings: { en: title },
                 contents: { en: message },
@@ -1674,7 +1676,7 @@ app.post('/api/notify/queue', async (req, res) => {
             },
             {
                 headers: {
-                    Authorization: 'os_v2_app_mwlruoglajd75jodclstue7mwfkkrt3cbsruzuvdiexjc4lp56qtuflmqtsv26bbcwgti2qzzxfkusuxijg77kgtzj4z5qfs3tlbtpq',
+                    Authorization: process.env.ONESIGNAL_API_KEY,
                     'Content-Type': 'application/json'
                 }
             }
