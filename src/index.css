@@ -646,3 +646,24 @@ a {
     min-width: 44px;
   }
 }
+
+/* ===========================================
+   MOBILE DROPDOWN EMERGENCY FIX
+   =========================================== */
+@media (max-width: 768px) {
+    /* Target both the notification panel and language dropdown */
+    .notif-panel, 
+    .language-dropdown, 
+    .lang-menu, 
+    .dropdown-menu,
+    .lang-selector-dropdown { /* Included common names for the language panel */
+        position: fixed !important;
+        top: 70px !important; /* Drops it just below your navbar */
+        left: 16px !important; /* 16px gap from the left edge */
+        right: 16px !important; /* 16px gap from the right edge */
+        width: auto !important; /* Forces it to fill the space between left and right */
+        max-width: none !important;
+        transform: none !important;
+        z-index: 9999 !important; /* Guarantees it stays on top */
+    }
+}
