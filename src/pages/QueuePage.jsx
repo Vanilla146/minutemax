@@ -200,31 +200,29 @@ const QueuePage = () => {
                 message: `You've joined the queue! Token: ${result.queue.token}`
             })
 
-            // 1. IMMEDIATELY trigger the in-app notification (Guaranteed to work on iPhone)
-            if (window.mmAddNotification) {
-                window.mmAddNotification(
-                    '✅ Joined Queue',
-                    `Your token is ${result.queue.token}. You are #${result.queue.position} in the ${queueType === 'fitting_room' ? 'Fitting Room' : 'Cashier'} queue.`,
-                    'success'
-                )
-            }
-
-            // 2. Then try to send the Push Notification without blocking the app
-            try {
-                getPlayerId().then(async (playerId) => {
-                    if (playerId) {
-                        sessionStorage.setItem('osPlayerId', playerId)
-                        await api.post('/notify/queue', {
-                            playerId,
-                            title: '✅ Joined Queue',
-                            message: `Your token is ${result.queue.token}. Position #${result.queue.position}`,
-                            type: 'success'
-                        })
-                    }
-                }).catch(err => console.log('Push skipped (likely iOS Safari):', err))
-            } catch (err) {
-                console.log('Notification error:', err)
-            }
+            // Send OneSignal notification + save to notification bar
+try {
+    const playerId = await getPlayerId()
+    if (playerId) {
+        sessionStorage.setItem('osPlayerId', playerId)
+        await api.post('/notify/queue', {
+            playerId,
+            title: '✅ Joined Queue',
+            message: `Your token is ${result.queue.token}. Position #${result.queue.position}`,
+            type: 'success'
+        })
+    }
+    // Also add to in-app notification bar
+    if (window.mmAddNotification) {
+        window.mmAddNotification(
+            '✅ Joined Queue',
+            `Your token is ${result.queue.token}. You are #${result.queue.position} in the ${queueType === 'fitting_room' ? 'Fitting Room' : 'Cashier'} queue.`,
+            'success'
+        )
+    }
+} catch (err) {
+    console.log('Notification error:', err)
+}
 
             
 
