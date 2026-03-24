@@ -13,5 +13,11 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  // ADD THIS SECTION FOR ANDROID COMPATIBILITY
+  build: {
+    target: 'es2015', 
+    cssTarget: 'chrome61',
+    outDir: 'dist'
   }
 })

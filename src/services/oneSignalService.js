@@ -8,27 +8,28 @@ const ONESIGNAL_APP_ID = '65971a38-cb02-47fe-a5c3-12e53a13ecb1'
 // Initialize OneSignal
 export const initOneSignal = async () => {
     try {
-        await window.OneSignalDeferred.push(async (OneSignal) => {
-            await OneSignal.init({
-                appId: ONESIGNAL_APP_ID,
-                safari_web_id: '',
-                notifyButton: {
-                    enable: false, // We handle our own UI
-                },
-                allowLocalhostAsSecureOrigin: true, // For local development
-                promptOptions: {
-                    slidedown: {
-                        enabled: true,
-                        actionMessage: "MinuteMax would like to send you queue notifications",
-                        acceptButtonText: "Allow",
-                        cancelButtonText: "No Thanks",
+        // Add a safety check for the window object
+        if (typeof window !== "undefined" && window.OneSignalDeferred) {
+            window.OneSignalDeferred.push(async (OneSignal) => {
+                await OneSignal.init({
+                    appId: ONESIGNAL_APP_ID,
+                    safari_web_id: '',
+                    notifyButton: { enable: false },
+                    allowLocalhostAsSecureOrigin: true,
+                    promptOptions: {
+                        slidedown: {
+                            enabled: true,
+                            actionMessage: "MinuteMax would like to send you queue notifications",
+                            acceptButtonText: "Allow",
+                            cancelButtonText: "No Thanks",
+                        }
                     }
-                }
-            })
-        })
-        console.log('✅ OneSignal initialized')
+                });
+            });
+            console.log('✅ OneSignal initialized');
+        }
     } catch (err) {
-        console.error('❌ OneSignal init error:', err)
+        console.error('❌ OneSignal init error:', err);
     }
 }
 
