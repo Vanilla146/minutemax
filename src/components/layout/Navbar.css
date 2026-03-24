@@ -490,3 +490,60 @@
         font-size: 12px;
     }
 }
+
+/* ===========================================
+   MOBILE NAVBAR SPACING & SIZING FIX
+   =========================================== */
+@media (max-width: 768px) {
+    /* 1. Stop the Logo from squishing */
+    .navbar-brand img, 
+    .navbar-logo {
+        flex-shrink: 0 !important;
+        width: 24px !important; /* Adjust if your logo is supposed to be bigger/smaller */
+        height: 24px !important;
+        object-fit: contain;
+    }
+
+    /* 2. Protect the MinuteMax Text */
+    .navbar-brand span,
+    .navbar-brand h1 {
+        font-size: 1.1rem !important; /* Slightly smaller to save space */
+        white-space: nowrap !important; /* Prevent text from wrapping or cutting weirdly */
+        flex-shrink: 0 !important;
+    }
+
+    /* 3. Squeeze the gaps between the icons */
+    .navbar-actions {
+        gap: 6px !important; /* Bring the icons closer together */
+    }
+
+    /* 4. Tame the "Get Started" Button */
+    .navbar-actions .btn,
+    .navbar-actions .btn-primary {
+        padding: 6px 12px !important;
+        font-size: 13px !important;
+        min-height: 36px !important; /* Overrides the bulky 48px we set earlier */
+        min-width: auto !important;
+        height: 36px !important;
+        line-height: 1 !important;
+        white-space: nowrap;
+    }
+
+    /* 5. Normalize the Icon Buttons (Bell, Profile, Menu) */
+    .notif-bell-btn, 
+    .navbar-actions .icon-btn,
+    .hamburger-btn {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        padding: 0 !important;
+    }
+}
+
+/* Extra safety for very tiny phones (like iPhone SE) */
+@media (max-width: 380px) {
+    .navbar-actions .btn-primary {
+        display: none !important; /* Hides "Get Started" only on the tiniest screens so the logo survives */
+    }
+}
