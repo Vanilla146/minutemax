@@ -1,3 +1,12 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* This is the most important line for mobile */
+  max-width: 100vw;       /* Prevents any single element from pushing the frame out */
+}
+
 /* ===============================
    MinuteMax - Global Styles
    Minimalist Design System
@@ -87,6 +96,8 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -94,7 +105,10 @@ body {
   background: var(--bg-white);
   color: var(--text-primary);
   line-height: 1.6;
+  /* UPDATE THESE */
+  width: 100%;
   overflow-x: hidden;
+  position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 14px;

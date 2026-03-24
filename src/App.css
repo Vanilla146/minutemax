@@ -184,4 +184,18 @@
         height: 40px;
         font-size: 1rem;
     }
+
+    /* NEW: Fix for unclickable areas */
+    .main-content {
+        z-index: 1;
+        position: relative;
+    }
+
+    /* NEW: Fat-finger friendly buttons */
+        .notif-bell-btn {
+        min-height: 38px !important;
+        min-width: 38px !important;
+        width: 38px !important;
+        height: 38px !important;
+    }
 }

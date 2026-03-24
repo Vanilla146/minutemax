@@ -9,8 +9,8 @@
 /* Bell Button */
 .notif-bell-btn {
     position: relative;
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -62,7 +62,9 @@
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    width: 360px;
+    /* FIX: Ensure it never exceeds the screen width */
+    width: 90vw; 
+    max-width: 360px; 
     background: #ffffff;
     border: 1px solid #e5e5e5;
     border-radius: 12px;
@@ -109,7 +111,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 8px;
+    padding: 8px 12px;
     background: none;
     border: 1px solid #e5e5e5;
     border-radius: 5px;
@@ -307,3 +309,38 @@
 .notif-list::-webkit-scrollbar { width: 4px; }
 .notif-list::-webkit-scrollbar-track { background: transparent; }
 .notif-list::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 2px; }
+
+
+@media (max-width: 600px) {
+    .notif-panel {
+        position: fixed;
+        top: 65px;
+        left: 4vw;
+        right: 4vw;
+        width: 92vw;
+        max-width: none;
+        max-height: 75vh;
+        overflow-y: auto;
+        z-index: 2000;
+    }
+
+    .notif-list {
+        max-height: 50vh;
+    }
+
+    .notif-panel-actions {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .notif-action-btn {
+        font-size: 10px;
+        padding: 6px 8px;
+    }
+
+    .notif-overlay {
+        position: fixed;
+        background: rgba(0, 0, 0, 0.4); /* Dim the background to make it look like a mobile modal */
+        backdrop-filter: blur(2px);
+    }
+}
