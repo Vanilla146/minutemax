@@ -37,7 +37,29 @@ const EMAIL_CONFIG = {
         pass: 'hdzu yzkx taug ewky' // Replace with your App Password (16 characters)
     }
 }
+const axios = require('axios'); // Make sure you have axios installed!
 
+// OneSignal Push Notification Helper
+// OneSignal Push Notification Helper
+const sendOneSignalPush = async (playerId, title, message) => {
+    if (!playerId) return; 
+    try {
+        await axios.post('https://onesignal.com/api/v1/notifications', {
+            app_id: process.env.ONESIGNAL_APP_ID,
+            include_player_ids: [playerId],
+            headings: { "en": title },
+            contents: { "en": message }
+        }, {
+            headers: {
+                'Authorization': `Basic ${process.env.ONESIGNAL_REST_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(`📱 [SENT] Push notification to player: ${playerId}`);
+    } catch (error) {
+        console.error("❌ OneSignal Push Error:", error.response?.data || error.message);
+    }
+};
 // Create email transporter
 let emailTransporter = null
 try {
@@ -109,9 +131,9 @@ const checkAndSendQueueNotifications = async () => {
     try {
         const connection = await pool.getConnection()
 
-        // Find users who are 2-3 positions away and haven't been notified
+        // 👉 UPDATED SELECT QUERY TO GRAB os_player_id
         const [usersToNotify] = await connection.query(`
-            SELECT q.id, q.user_id, q.queue_type, q.position, q.notified_at,
+            SELECT q.id, q.user_id, q.queue_type, q.position, q.notified_at, q.os_player_id,
                    u.name, u.email, u.phone,
                    s.name as store_name
             FROM queues q
@@ -134,6 +156,11 @@ const checkAndSendQueueNotifications = async () => {
                 }
 
                 await sendEmailNotification(user.email, subject, body)
+
+                // 👉 NEW: SEND THE ONESIGNAL PUSH NOTIFICATION HERE!
+                if (user.os_player_id) {
+                    await sendOneSignalPush(user.os_player_id, subject, body);
+                }
 
                 // Mark as notified
                 await connection.query(
@@ -844,8 +871,9 @@ app.get('/api/queue/status', async (req, res) => {
 // Join queue (single store - no storeId required)
 app.post('/api/queue/join', optionalAuth, async (req, res) => {
     try {
-        const { queueType, customerName, customerPhone } = req.body
-        const storeId = 1 // Single store
+        // 👉 ADD osPlayerId HERE
+        const { queueType, customerName, customerPhone, osPlayerId } = req.body
+        const storeId = 1 
         const userId = req.userId || null
 
         if (!queueType) {
@@ -876,22 +904,20 @@ if (userId) {
 }
 
         // Get current position
-        const [lastPosition] = await pool.query(
+       const [lastPosition] = await pool.query(
             'SELECT MAX(position) as maxPos FROM queues WHERE store_id = ? AND queue_type = ? AND status = "waiting"',
             [storeId, queueType]
         )
 
         const position = (lastPosition[0].maxPos || 0) + 1
         const estimatedWait = position * (queueType === 'checkout' ? 3 : 8)
-
-        // Generate token number (e.g., F001 for fitting, C001 for cashier)
         const prefix = queueType === 'fitting_room' ? 'F' : 'C'
         const tokenNumber = `${prefix}${String(position).padStart(3, '0')}`
 
 const [result] = await pool.query(
-    'INSERT INTO queues (user_id, store_id, queue_type, position, token) VALUES (?, ?, ?, ?, ?)',
-    [userId, storeId, queueType, position, tokenNumber]
-)
+            'INSERT INTO queues (user_id, store_id, queue_type, position, token, os_player_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [userId, storeId, queueType, position, tokenNumber, osPlayerId || null]
+        )
 
 // Calculate actual position (people actually waiting ahead)
 const [ahead] = await pool.query(

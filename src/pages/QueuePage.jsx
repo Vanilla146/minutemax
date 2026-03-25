@@ -141,7 +141,23 @@ const QueuePage = () => {
         return `${baseUrl}/queue`
     }
 
-    
+    // 🫀 THE HEARTBEAT: Auto-refresh the queue silently in the background
+    useEffect(() => {
+        let intervalId;
+
+        // ONLY start the heartbeat if the user is actively in a queue and API is connected
+        if (selectedQueue && apiConnected) {
+            // Silently ping the backend every 10 seconds
+            intervalId = setInterval(() => {
+                refreshQueue(); 
+            }, 10000); // 10000 ms = 10 seconds
+        }
+
+        // Clean up the timer when they leave the queue or close the page
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [selectedQueue, apiConnected]);
 
     // Load store and queue status on mount
     useEffect(() => {

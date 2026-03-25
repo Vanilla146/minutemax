@@ -99,9 +99,14 @@ export const queueService = {
 
     // Join queue (single store - no storeId needed)
     join: async (queueType, guestQueueId = null) => {
-    const response = await api.post('/queue/join', { queueType, guestQueueId })
-    return response.data
-},
+        const response = await api.post('/queue/join', { 
+            queueType, 
+            guestQueueId,
+            // 👉 Add this line to grab the phone ID and send it to the backend!
+            osPlayerId: localStorage.getItem('osPlayerId') 
+        })
+        return response.data
+    },
 
     // Leave queue
  leave: async (queueId) => {
