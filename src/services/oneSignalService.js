@@ -37,11 +37,17 @@ export const initOneSignal = async () => {
 export const subscribeToNotifications = async () => {
     try {
         await window.OneSignalDeferred.push(async (OneSignal) => {
-            // Use the Slidedown prompt instead of the raw native request
+            // 1. If the browser already said yes, just force OneSignal to sync!
+            if (Notification.permission === 'granted') {
+                await OneSignal.User.PushSubscription.optIn();
+                return; // Stop here, no need for a popup
+            }
+            
+            // 2. Otherwise, show the normal prompt
             await OneSignal.Slidedown.promptPush({ force: true });
-        })
+        });
     } catch (err) {
-        console.error('Subscribe error:', err)
+        console.error('Subscribe error:', err);
     }
 }
 
