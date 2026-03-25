@@ -37,39 +37,40 @@ const QueueVisualization3D = lazy(() => import('../components/3d/QueueVisualizat
 
 // Browser Notification Service
 const requestNotificationPermission = async () => {
-    if (!('Notification' in window)) return false
+    if (!('Notification' in window)) return false;
     
     try {
         // ONLY ask for native permission. 
-        // DO NOT register the Service Worker here. OneSignal handles that.
-        const permission = await Notification.requestPermission()
-        return permission === 'granted'
+        // DO NOT manually register the Service Worker here. OneSignal must own it.
+        const permission = await Notification.requestPermission();
+        return permission === 'granted';
     } catch (err) {
-        console.warn('Permission request failed:', err)
-        return false
+        console.warn('Permission request failed:', err);
+        return false;
     }
 }
 
 const sendBrowserNotification = async (title, body) => {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
     const options = {
         body,
         icon: '/favicon.ico',
         badge: '/favicon.ico',
         vibrate: [200, 100, 200]
-    }
+    };
 
     try {
+        // Safely "piggyback" off OneSignal's worker to show native OS notifications 
+        // even when the user is staring right at the web app!
         if ('serviceWorker' in navigator) {
-            const registration = await navigator.serviceWorker.ready
-            await registration.showNotification(title, options)
+            const registration = await navigator.serviceWorker.ready;
+            await registration.showNotification(title, options);
         } else {
-            new Notification(title, options) // desktop fallback only
+            new Notification(title, options); // Fallback for Desktop Safari
         }
     } catch (err) {
-        console.warn('Browser notification failed:', err)
-        // Silent fail — in-app notification bar is the fallback
+        console.warn('Foreground browser notification failed:', err);
     }
 }
 
