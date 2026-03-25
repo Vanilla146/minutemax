@@ -149,9 +149,9 @@ const QueuePage = () => {
     if (isAuthenticated) {
         checkUserQueueStatus()
     } else {
-        const guestQueueId = sessionStorage.getItem('guestQueueId')
-        const guestToken = sessionStorage.getItem('guestToken')
-        const guestQueueType = sessionStorage.getItem('guestQueueType')
+        const guestQueueId = localStorage.getItem('guestQueueId')
+        const guestToken = localStorage.getItem('guestToken')
+        const guestQueueType = localStorage.getItem('guestQueueType')
 
         if (guestQueueId && guestToken && guestQueueType) {
             checkGuestQueueStatus(guestQueueId, guestToken, guestQueueType)
@@ -215,7 +215,7 @@ const QueuePage = () => {
     const joinQueue = async (queueType) => {
         try {
             const result = await queueService.join(queueType, 
-    sessionStorage.getItem('guestQueueId')  // ← send existing guest queue ID
+    localStorage.getItem('guestQueueId')  // ← send existing guest queue ID
 )
             setApiConnected(true)
 
@@ -243,7 +243,7 @@ const QueuePage = () => {
 try {
     const playerId = await getPlayerId()
     if (playerId) {
-        sessionStorage.setItem('osPlayerId', playerId)
+        localStorage.setItem('osPlayerId', playerId)
         await api.post('/notify/queue', {
             playerId,
             title: '✅ Joined Queue',
@@ -266,9 +266,9 @@ try {
             
 
             if (!isAuthenticated) {
-    sessionStorage.setItem('guestQueueId', String(result.queue.id))
-    sessionStorage.setItem('guestToken', result.queue.token)
-    sessionStorage.setItem('guestQueueType', queueType)
+    localStorage.setItem('guestQueueId', String(result.queue.id))
+    localStorage.setItem('guestToken', result.queue.token)
+    localStorage.setItem('guestQueueType', queueType)
 }
 
             // Refresh queue status
@@ -377,9 +377,9 @@ const checkGuestQueueStatus = async (queueId, token, queueType) => {
                 store_name: store?.name
             })
         } else {
-            sessionStorage.removeItem('guestQueueId')
-            sessionStorage.removeItem('guestToken')
-            sessionStorage.removeItem('guestQueueType')
+            localStorage.removeItem('guestQueueId')
+            localStorage.removeItem('guestToken')
+            localStorage.removeItem('guestQueueType')
         }
     } catch (err) {
         console.log('Could not restore guest queue status')
@@ -412,7 +412,7 @@ setSelectedQueue(prev => ({
 }))
             }
         } else {
-            const guestQueueId = sessionStorage.getItem('guestQueueId')
+            const guestQueueId = localStorage.getItem('guestQueueId')
             if (guestQueueId) {
                 const response = await api.get(`/queue/status/${guestQueueId}`)
                 if (response.data?.status === 'waiting') {
@@ -434,10 +434,10 @@ setSelectedQueue(prev => ({
 }
 
     const leaveQueue = async () => {
-        const queueId = selectedQueue?.id || sessionStorage.getItem('guestQueueId')
-    sessionStorage.removeItem('guestQueueId')
-sessionStorage.removeItem('guestToken')
-sessionStorage.removeItem('guestQueueType')
+        const queueId = selectedQueue?.id || localStorage.getItem('guestQueueId')
+    localStorage.removeItem('guestQueueId')
+localStorage.removeItem('guestToken')
+localStorage.removeItem('guestQueueType')
         
         try {
             await queueService.leave(queueId)
@@ -663,25 +663,7 @@ const SelectedIcon = selectedQueue?.icon || null
                                     <button className="btn btn-secondary leave-btn" onClick={leaveQueue}>
                                         Leave Queue
                                     </button>
-                                    <button 
-    onClick={async () => {
-        try {
-            const perm = Notification.permission;
-            const osLoaded = !!window.OneSignalDeferred;
-            alert(`1. Browser Permission: ${perm}\n2. OneSignal Loaded: ${osLoaded}`);
-            
-            await window.OneSignalDeferred.push(async (OneSignal) => {
-                const pushSupported = OneSignal.Notifications.isPushSupported();
-                alert(`3. Push Supported: ${pushSupported}`);
-            });
-        } catch (e) {
-            alert(`Error: ${e.message}`);
-        }
-    }}
-    style={{ background: 'red', color: 'white', padding: '10px', marginTop: '10px' }}
->
-    📱 RUN PHONE DIAGNOSTIC
-</button>
+                                    
                                 </motion.div>
                             )}
                         </div>
