@@ -78,19 +78,33 @@ const QueuePage = () => {
 
     // Check position and send notification when almost their turn
     useEffect(() => {
-        if (userQueueStatus && notificationsEnabled) {
-            const position = userQueueStatus.position
-            // Notify when 2 people ahead or less
-            if (position <= 3 && position !== lastNotifiedPosition) {
-                if (position === 1) {
-                    sendBrowserNotification('🎉 It\'s Your Turn!', 'Please proceed to the counter now.')
-                } else if (position <= 3) {
-                    sendBrowserNotification('⏰ Almost Your Turn!', `Only ${position - 1} ${position - 1 === 1 ? 'person' : 'people'} ahead of you.`)
+    if (userQueueStatus) {
+        const position = userQueueStatus.position
+        if (position <= 3 && position !== lastNotifiedPosition) {
+            if (position === 1) {
+                sendBrowserNotification('🎉 It\'s Your Turn!', 'Please proceed to the counter now.')
+                if (window.mmAddNotification) {
+                    window.mmAddNotification(
+                        '🎉 It\'s Your Turn!',
+                        'Please proceed to the counter now.',
+                        'turn'
+                    )
                 }
-                setLastNotifiedPosition(position)
+            } else if (position <= 3) {
+                const msg = `Only ${position - 1} ${position - 1 === 1 ? 'person' : 'people'} ahead of you.`
+                sendBrowserNotification('⏰ Almost Your Turn!', msg)
+                if (window.mmAddNotification) {
+                    window.mmAddNotification(
+                        '⏰ Almost Your Turn!',
+                        msg,
+                        'warning'
+                    )
+                }
             }
+            setLastNotifiedPosition(position)
         }
-    }, [userQueueStatus, notificationsEnabled, lastNotifiedPosition])
+    }
+}, [userQueueStatus, lastNotifiedPosition])
 
     // Generate QR code URL - use network IP for phone scanning
     const getQrCodeUrl = () => {
