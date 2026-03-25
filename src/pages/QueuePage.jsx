@@ -38,20 +38,12 @@ const QueueVisualization3D = lazy(() => import('../components/3d/QueueVisualizat
 // Browser Notification Service
 const requestNotificationPermission = async () => {
     if (!('Notification' in window)) return false
-
+    
     try {
+        // ONLY ask for native permission. 
+        // DO NOT register the Service Worker here. OneSignal handles that.
         const permission = await Notification.requestPermission()
-        if (permission !== 'granted') return false
-
-        // Android Chrome needs a ServiceWorker to show notifications
-        if ('serviceWorker' in navigator) {
-            try {
-                await navigator.serviceWorker.register('/OneSignalSDKWorker.js')
-            } catch (swErr) {
-                console.warn('SW registration skipped:', swErr)
-            }
-        }
-        return true
+        return permission === 'granted'
     } catch (err) {
         console.warn('Permission request failed:', err)
         return false

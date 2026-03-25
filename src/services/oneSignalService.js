@@ -37,8 +37,8 @@ export const initOneSignal = async () => {
 export const subscribeToNotifications = async () => {
     try {
         await window.OneSignalDeferred.push(async (OneSignal) => {
-            const permission = await OneSignal.Notifications.requestPermission()
-            console.log('🔔 Notification permission:', permission)
+            // Use the Slidedown prompt instead of the raw native request
+            await OneSignal.Slidedown.promptPush({ force: true });
         })
     } catch (err) {
         console.error('Subscribe error:', err)
