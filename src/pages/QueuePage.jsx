@@ -31,9 +31,6 @@ import queueIllustration from '../assets/images/queue-illustration.png'
         color: '#667eea'
     }
 ]
-window.onerror = function (msg, url, line, col, error) {
-  alert("ERROR: " + msg);
-};
 // Lazy load 3D queue visualization
 const QueueVisualization3D = lazy(() => import('../components/3d/QueueVisualization3D'))
 
