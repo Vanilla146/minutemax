@@ -663,6 +663,25 @@ const SelectedIcon = selectedQueue?.icon || null
                                     <button className="btn btn-secondary leave-btn" onClick={leaveQueue}>
                                         Leave Queue
                                     </button>
+                                    <button 
+    onClick={async () => {
+        try {
+            const perm = Notification.permission;
+            const osLoaded = !!window.OneSignalDeferred;
+            alert(`1. Browser Permission: ${perm}\n2. OneSignal Loaded: ${osLoaded}`);
+            
+            await window.OneSignalDeferred.push(async (OneSignal) => {
+                const pushSupported = OneSignal.Notifications.isPushSupported();
+                alert(`3. Push Supported: ${pushSupported}`);
+            });
+        } catch (e) {
+            alert(`Error: ${e.message}`);
+        }
+    }}
+    style={{ background: 'red', color: 'white', padding: '10px', marginTop: '10px' }}
+>
+    📱 RUN PHONE DIAGNOSTIC
+</button>
                                 </motion.div>
                             )}
                         </div>
