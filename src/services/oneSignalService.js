@@ -14,7 +14,7 @@ export const initOneSignal = async () => {
                 await OneSignal.init({
                     appId: ONESIGNAL_APP_ID,
                     safari_web_id: '',
-                    notifyButton: { enable: false },
+                    notifyButton: { enable: true },
                     allowLocalhostAsSecureOrigin: true,
                     promptOptions: {
                         slidedown: {
@@ -34,16 +34,18 @@ export const initOneSignal = async () => {
 }
 
 // Request notification permission and subscribe
-export const subscribeToNotifications = async () => {
-    try {
-        await window.OneSignalDeferred.push(async (OneSignal) => {
-            const permission = await OneSignal.Notifications.requestPermission()
-            console.log('🔔 Notification permission:', permission)
-        })
-    } catch (err) {
-        console.error('Subscribe error:', err)
-    }
-}
+export const subscribeToNotifications = () => {
+    if (!window.OneSignalDeferred) return;
+
+    window.OneSignalDeferred.push(async (OneSignal) => {
+        try {
+            await OneSignal.Notifications.requestPermission();
+            console.log("✅ Permission requested");
+        } catch (err) {
+            console.error("❌ Permission error:", err);
+        }
+    });
+};
 
 // Get the OneSignal player/subscription ID
 export const getPlayerId = async () => {

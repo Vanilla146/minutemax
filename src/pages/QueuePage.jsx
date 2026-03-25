@@ -53,7 +53,14 @@ const QueuePage = () => {
     const [notificationsEnabled, setNotificationsEnabled] = useState(false)
     const [lastNotifiedPosition, setLastNotifiedPosition] = useState(null)
     const [showVisualQueue, setShowVisualQueue] = useState(true)
-   
+   // ✅ ADD THIS EXACTLY HERE
+useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {
+            console.log("Permission request failed");
+        });
+    }
+}, []);
 
     // Request notification permission on mount
     
