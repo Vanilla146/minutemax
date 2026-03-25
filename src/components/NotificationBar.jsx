@@ -70,11 +70,23 @@ const NotificationBar = () => {
     }
 
     const handleEnableNotifications = async () => {
-        setRequesting(true)
-        await subscribeToNotifications()
-        const enabled = await isNotificationEnabled()
-        setNotifEnabled(enabled)
-        setRequesting(false)
+        // Prevent multiple clicks if already requesting
+        if (requesting) return;
+
+        setRequesting(true);
+        
+        try {
+            await subscribeToNotifications();
+            // Optional: You could add a slight delay here if OneSignal needs a moment to update its state
+        } catch (error) {
+            console.error("Failed to enable notifications:", error);
+            // Optionally add an alert or notification here to inform the user
+        } finally {
+            // ALWAYS turn off the requesting state, whether it succeeded or failed
+            const enabled = await isNotificationEnabled();
+            setNotifEnabled(enabled);
+            setRequesting(false);
+        }
     }
 
     const getIcon = (type) => {
