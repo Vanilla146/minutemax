@@ -35,24 +35,9 @@ import queueIllustration from '../assets/images/queue-illustration.png'
 const QueueVisualization3D = lazy(() => import('../components/3d/QueueVisualization3D'))
 
 // Browser Notification Service
-const requestNotificationPermission = async () => {
-    if ('Notification' in window) {
-        const permission = await Notification.requestPermission()
-        return permission === 'granted'
-    }
-    return false
-}
 
-const sendBrowserNotification = (title, body) => {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(title, {
-            body,
-            icon: '/favicon.ico',
-            badge: '/favicon.ico',
-            vibrate: [200, 100, 200]
-        })
-    }
-}
+
+
 
 const QueuePage = () => {
     const { t } = useTranslation()
@@ -71,11 +56,7 @@ const QueuePage = () => {
    
 
     // Request notification permission on mount
-    useEffect(() => {
-        requestNotificationPermission().then(granted => {
-            setNotificationsEnabled(granted)
-        })
-    }, [])
+    
 
     // Check position and send notification when almost their turn
     useEffect(() => {
@@ -83,7 +64,7 @@ const QueuePage = () => {
         const position = userQueueStatus.position
         if (position <= 3 && position !== lastNotifiedPosition) {
             if (position === 1) {
-                sendBrowserNotification('🎉 It\'s Your Turn!', 'Please proceed to the counter now.')
+                
                 if (window.mmAddNotification) {
                     window.mmAddNotification(
                         '🎉 It\'s Your Turn!',
@@ -93,7 +74,7 @@ const QueuePage = () => {
                 }
             } else if (position <= 3) {
                 const msg = `Only ${position - 1} ${position - 1 === 1 ? 'person' : 'people'} ahead of you.`
-                sendBrowserNotification('⏰ Almost Your Turn!', msg)
+                
                 if (window.mmAddNotification) {
                     window.mmAddNotification(
                         '⏰ Almost Your Turn!',
@@ -317,7 +298,7 @@ try {
                         type: 'alert',
                         message: "🎉 It's your turn! Please proceed to the counter."
                     })
-                    sendBrowserNotification("🎉 It's Your Turn!", "Please proceed to the counter now.")
+                    
                     return { ...prev, position: 1, estimatedWait: 0 }
                 }
 
@@ -330,13 +311,13 @@ try {
                         type: 'info',
                         message: `⏰ Almost your turn! Only 2 people ahead of you.`
                     })
-                    sendBrowserNotification('⏰ Almost Your Turn!', 'Only 2 people ahead of you.')
+                    
                 } else if (newPosition === 2) {
                     setNotification({
                         type: 'info',
                         message: `⏰ Get ready! Only 1 person ahead of you.`
                     })
-                    sendBrowserNotification('⏰ Get Ready!', 'Only 1 person ahead of you.')
+                    
                 }
 
                 return {
