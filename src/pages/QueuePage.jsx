@@ -31,13 +31,31 @@ import queueIllustration from '../assets/images/queue-illustration.png'
         color: '#667eea'
     }
 ]
+window.onerror = function (msg, url, line, col, error) {
+  alert("ERROR: " + msg);
+};
 // Lazy load 3D queue visualization
 const QueueVisualization3D = lazy(() => import('../components/3d/QueueVisualization3D'))
 
 // Browser Notification Service
+const requestNotificationPermission = async () => {
+    if ('Notification' in window) {
+        const permission = await Notification.requestPermission()
+        return permission === 'granted'
+    }
+    return false
+}
 
-
-
+const sendBrowserNotification = (title, body) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, {
+            body,
+            icon: '/favicon.ico',
+            badge: '/favicon.ico',
+            vibrate: [200, 100, 200]
+        })
+    }
+}
 
 const QueuePage = () => {
     const { t } = useTranslation()
@@ -48,22 +66,18 @@ const QueuePage = () => {
     const [userQueueStatus, setUserQueueStatus] = useState(null)
     const [notification, setNotification] = useState(null)
     const [loading, setLoading] = useState(true)
-    const [checkingStatus, setCheckingStatus] = useState(true)
     const [apiConnected, setApiConnected] = useState(true)
     const [notificationsEnabled, setNotificationsEnabled] = useState(false)
     const [lastNotifiedPosition, setLastNotifiedPosition] = useState(null)
     const [showVisualQueue, setShowVisualQueue] = useState(true)
-   // ✅ ADD THIS EXACTLY HERE
-useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission().catch(() => {
-            console.log("Permission request failed");
-        });
-    }
-}, []);
+   const [checkingStatus, setCheckingStatus] = useState(false)
 
     // Request notification permission on mount
-    
+    useEffect(() => {
+        requestNotificationPermission().then(granted => {
+            setNotificationsEnabled(granted)
+        })
+    }, [])
 
     // Check position and send notification when almost their turn
     useEffect(() => {
@@ -71,7 +85,7 @@ useEffect(() => {
         const position = userQueueStatus.position
         if (position <= 3 && position !== lastNotifiedPosition) {
             if (position === 1) {
-                
+                sendBrowserNotification('🎉 It\'s Your Turn!', 'Please proceed to the counter now.')
                 if (window.mmAddNotification) {
                     window.mmAddNotification(
                         '🎉 It\'s Your Turn!',
@@ -81,7 +95,7 @@ useEffect(() => {
                 }
             } else if (position <= 3) {
                 const msg = `Only ${position - 1} ${position - 1 === 1 ? 'person' : 'people'} ahead of you.`
-                
+                sendBrowserNotification('⏰ Almost Your Turn!', msg)
                 if (window.mmAddNotification) {
                     window.mmAddNotification(
                         '⏰ Almost Your Turn!',
@@ -108,32 +122,19 @@ useEffect(() => {
     
 
     // Load store and queue status on mount
-   useEffect(() => {
-  const init = async () => {
-    setLoading(true)
-
-    await loadStoreAndQueue()
-
+    useEffect(() => {
+    loadStoreAndQueue()
     if (isAuthenticated) {
-      await checkUserQueueStatus()
+        checkUserQueueStatus()
     } else {
-      const guestQueueId = sessionStorage.getItem('guestQueueId')
-      const guestToken = sessionStorage.getItem('guestToken')
-      const guestQueueType = sessionStorage.getItem('guestQueueType')
+        const guestQueueId = sessionStorage.getItem('guestQueueId')
+        const guestToken = sessionStorage.getItem('guestToken')
+        const guestQueueType = sessionStorage.getItem('guestQueueType')
 
-      if (guestQueueId && guestToken && guestQueueType) {
-        await checkGuestQueueStatus(
-          guestQueueId,
-          guestToken,
-          guestQueueType
-        )
-      }
+        if (guestQueueId && guestToken && guestQueueType) {
+            checkGuestQueueStatus(guestQueueId, guestToken, guestQueueType)
+        }
     }
-
-    setLoading(false)
-  }
-
-  init()
 }, [isAuthenticated])
 
     const loadStoreAndQueue = async () => {
@@ -167,29 +168,27 @@ useEffect(() => {
     }
 
     const checkUserQueueStatus = async () => {
-  try {
-    const status = await queueService.getMyStatus()
-
-    if (status.inQueue) {
-      setUserQueueStatus(status.queue)
-
-      const queueOpt = queueOptions.find(
-        q => q.type === status.queue.queue_type
-      )
-
-      setSelectedQueue({
-        ...queueOpt,
-        id: status.queue.id,
-        token: status.queue.token,
-        peopleInQueue: status.queue.peopleAhead
-      })
+    try {
+        const status = await queueService.getMyStatus()
+        console.log('MY STATUS:', JSON.stringify(status))
+        if (status.inQueue) {
+            setUserQueueStatus(status.queue)
+            const queueOpt = queueOptions.find(q => q.type === status.queue.queue_type)
+            console.log('QUEUE OPT FOUND:', queueOpt)
+            setSelectedQueue({
+    ...queueOpt,
+    id: status.queue.id,
+    token: status.queue.token,
+    peopleInQueue: status.queue.totalInQueue
+})
+        }
+    } catch (err) {
+        console.log('Could not check queue status')
+    } finally {
+        setCheckingStatus(false)
     }
-  } catch (err) {
-    console.log('Could not check queue status')
-  } finally {
-    setCheckingStatus(false) // ⭐ VERY IMPORTANT
-  }
 }
+
     // Join queue
     const joinQueue = async (queueType) => {
         try {
@@ -203,7 +202,7 @@ useEffect(() => {
     ...queueOpt,
     id: result.queue.id,
     token: result.queue.token,
-    peopleInQueue: result.queue.peopleAhead
+    peopleInQueue: result.queue.position
 })
 
             setUserQueueStatus({
@@ -305,7 +304,7 @@ try {
                         type: 'alert',
                         message: "🎉 It's your turn! Please proceed to the counter."
                     })
-                    
+                    sendBrowserNotification("🎉 It's Your Turn!", "Please proceed to the counter now.")
                     return { ...prev, position: 1, estimatedWait: 0 }
                 }
 
@@ -318,13 +317,13 @@ try {
                         type: 'info',
                         message: `⏰ Almost your turn! Only 2 people ahead of you.`
                     })
-                    
+                    sendBrowserNotification('⏰ Almost Your Turn!', 'Only 2 people ahead of you.')
                 } else if (newPosition === 2) {
                     setNotification({
                         type: 'info',
                         message: `⏰ Get ready! Only 1 person ahead of you.`
                     })
-                    
+                    sendBrowserNotification('⏰ Get Ready!', 'Only 1 person ahead of you.')
                 }
 
                 return {
@@ -378,7 +377,7 @@ const refreshQueue = async () => {
 }))
 // Trigger in-app notification for position updates
 if (window.mmAddNotification) {
-    const pos = status.queue.position
+    const pos = isAuthenticated ? status.queue.position : response.data.position
     if (pos === 1) {
         window.mmAddNotification('🎉 It\'s Your Turn!', 'Please proceed to the counter now.', 'turn')
     } else if (pos <= 3) {
@@ -500,7 +499,7 @@ const SelectedIcon = selectedQueue?.icon || null
                     <div className="queue-layout">
                         {/* Queue Selection / Status */}
                         <div className="queue-panel">
-                            {loading || checkingStatus ? (
+                            {loading ? (
     <div className="loading-state">
                                     <FiLoader className="spinner" />
                                     <p>Loading...</p>

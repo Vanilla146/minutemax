@@ -1,4 +1,3 @@
-import { initOneSignal } from './services/oneSignalService'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import LandingPage from './pages/LandingPage'
@@ -41,14 +40,7 @@ const RoleBasedDashboard = () => {
     return <Dashboard />
 }
 
-import { useEffect } from 'react'
-
 function App() {
-
-    useEffect(() => {
-        initOneSignal()
-    }, [])
-
     return (
         <AuthProvider>
             <Router>
