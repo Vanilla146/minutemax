@@ -70,22 +70,28 @@ const NotificationBar = () => {
     }
 
     const handleEnableNotifications = async () => {
-        // Prevent multiple clicks if already requesting
-        if (requesting) return;
-
+        if (requesting) return; // Prevent double clicks
+        
         setRequesting(true);
         
         try {
-            await subscribeToNotifications();
-            // Optional: You could add a slight delay here if OneSignal needs a moment to update its state
+            // RACE CONDITION: Give OneSignal exactly 4 seconds to figure it out.
+            // If it takes longer, the timer wins and forces the code to move on.
+            await Promise.race([
+                subscribeToNotifications(),
+                new Promise((resolve) => setTimeout(resolve, 4000))
+            ]);
         } catch (error) {
-            console.error("Failed to enable notifications:", error);
-            // Optionally add an alert or notification here to inform the user
+            console.error("Subscription error:", error);
         } finally {
-            // ALWAYS turn off the requesting state, whether it succeeded or failed
-            const enabled = await isNotificationEnabled();
-            setNotifEnabled(enabled);
-            setRequesting(false);
+            // NO MATTER WHAT HAPPENS, do this:
+            try {
+                const enabled = await isNotificationEnabled();
+                setNotifEnabled(enabled);
+            } catch (err) {
+                console.log("Could not check status", err);
+            }
+            setRequesting(false); // FORCIBLY turn off "Requesting..."
         }
     }
 
