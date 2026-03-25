@@ -31,29 +31,53 @@ import queueIllustration from '../assets/images/queue-illustration.png'
         color: '#667eea'
     }
 ]
-window.onerror = function (msg, url, line, col, error) {
-  alert("ERROR: " + msg);
-};
+
 // Lazy load 3D queue visualization
 const QueueVisualization3D = lazy(() => import('../components/3d/QueueVisualization3D'))
 
 // Browser Notification Service
 const requestNotificationPermission = async () => {
-    if ('Notification' in window) {
+    if (!('Notification' in window)) return false
+
+    try {
         const permission = await Notification.requestPermission()
-        return permission === 'granted'
+        if (permission !== 'granted') return false
+
+        // Android Chrome needs a ServiceWorker to show notifications
+        if ('serviceWorker' in navigator) {
+            try {
+                await navigator.serviceWorker.register('/OneSignalSDKWorker.js')
+            } catch (swErr) {
+                console.warn('SW registration skipped:', swErr)
+            }
+        }
+        return true
+    } catch (err) {
+        console.warn('Permission request failed:', err)
+        return false
     }
-    return false
 }
 
-const sendBrowserNotification = (title, body) => {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(title, {
-            body,
-            icon: '/favicon.ico',
-            badge: '/favicon.ico',
-            vibrate: [200, 100, 200]
-        })
+const sendBrowserNotification = async (title, body) => {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return
+
+    const options = {
+        body,
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        vibrate: [200, 100, 200]
+    }
+
+    try {
+        if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.ready
+            await registration.showNotification(title, options)
+        } else {
+            new Notification(title, options) // desktop fallback only
+        }
+    } catch (err) {
+        console.warn('Browser notification failed:', err)
+        // Silent fail — in-app notification bar is the fallback
     }
 }
 
@@ -74,10 +98,15 @@ const QueuePage = () => {
 
     // Request notification permission on mount
     useEffect(() => {
-        requestNotificationPermission().then(granted => {
-            setNotificationsEnabled(granted)
-        })
-    }, [])
+    // Don't re-ask if already granted
+    if ('Notification' in window && Notification.permission === 'granted') {
+        setNotificationsEnabled(true)
+        return
+    }
+    requestNotificationPermission().then(granted => {
+        setNotificationsEnabled(granted)
+    })
+}, [])
 
     // Check position and send notification when almost their turn
     useEffect(() => {
