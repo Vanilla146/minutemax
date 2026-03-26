@@ -1382,8 +1382,10 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
         };
 
         // 3. The Prompt - Telling the AI exactly how to act
+        // 3. The Prompt - Telling the AI exactly how to act
         const prompt = `You are an expert fashion stylist AI. Analyze this clothing image. 
         Provide the following details in a strict JSON format:
+        - "detectedCategory": strictly one of "tops", "bottoms", "shoes", "accessories", or "full-body".
         - "detectedGender": strictly "men", "women", or "unisex".
         - "genderConfidence": a number between 1 and 100.
         - "primaryColor": the dominant color (e.g., "Black", "Blue", "White", "Red", "Green", "Yellow", "Grey", "Brown", "Pink", "Purple", "Orange", "Beige", "Cream").
@@ -1400,6 +1402,7 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
         console.log(`✅ Gemini Analysis Complete:`, aiData);
 
         // 5. Extract the REAL data from the AI
+        const uploadedCategory = aiData.detectedCategory || 'tops'; // 👈 ADDED THIS LINE
         const detectedGender = userSpecifiedGender || aiData.detectedGender || 'unisex';
         const genderConfidence = userSpecifiedGender ? 100 : (aiData.genderConfidence || 85);
         const primaryColor = aiData.primaryColor || 'Black';
@@ -1433,14 +1436,17 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
         const colorConditions = allMatchColors.map(c => `color LIKE '%${c}%'`).join(' OR ')
 
         // Get products from your database that match what the AI saw
+        // Get products from your database that match what the AI saw
         const [products] = await pool.query(`
             SELECT p.*,
                 CASE
+                    WHEN p.category = ? THEN FLOOR(40 + RAND() * 10)
                     WHEN color IN (${detectedColors.map(c => `'${c}'`).join(',')}) THEN FLOOR(92 + RAND() * 8)
                     WHEN ${colorConditions} THEN FLOOR(82 + RAND() * 12)
                     ELSE FLOOR(70 + RAND() * 15)
                 END as match_score,
                 CASE
+                    WHEN p.category = ? THEN 'Alternative Option'
                     WHEN color IN (${detectedColors.map(c => `'${c}'`).join(',')}) THEN 'Perfect Color Match'
                     WHEN ${colorConditions} THEN 'Complementary Color'
                     ELSE 'Style Complement'
@@ -1449,13 +1455,14 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
             WHERE p.in_stock = TRUE
               AND (p.gender = ? OR p.gender = 'unisex')
             ORDER BY
+                CASE WHEN p.category = ? THEN 1 ELSE 0 END,
                 CASE WHEN p.gender = ? THEN 0 ELSE 1 END,
                 CASE WHEN color IN (${detectedColors.map(c => `'${c}'`).join(',')}) THEN 0
                      WHEN ${colorConditions} THEN 1
                      ELSE 2 END,
                 RAND()
             LIMIT 12
-        `, [detectedGender, detectedGender])
+        `, [uploadedCategory, uploadedCategory, detectedGender, uploadedCategory, detectedGender])
 
         const outfitSuggestion = {
             tops: products.filter(p => p.category === 'tops').slice(0, 3),
