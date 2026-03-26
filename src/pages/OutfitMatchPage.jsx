@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiCamera, FiUpload, FiHeart, FiShoppingCart, FiRefreshCw, FiFilter, FiX, FiCheck, FiAlertCircle, FiZap, FiStar, FiCpu, FiLoader, FiCalendar, FiSliders, FiEye } from 'react-icons/fi'
 import { outfitService, favoriteService, productService } from '../services/api'
-import { classifyImage, preloadModel, isModelReady } from '../services/imageClassifier'
 import { useAuth } from '../context/AuthContext'
 import AROverlay from '../components/AROverlay'
 import './OutfitMatchPage.css'
-
 
 // Images
 import outfitImage from '../assets/images/outfit-matching.png'
@@ -26,7 +24,6 @@ const OutfitMatchPage = () => {
     const [error, setError] = useState(null)
     const [apiConnected, setApiConnected] = useState(true)
     const [analysisStep, setAnalysisStep] = useState('')
-    const [modelStatus, setModelStatus] = useState('loading')
 
     // Filter states
     const [selectedOccasion, setSelectedOccasion] = useState('all')
@@ -36,9 +33,9 @@ const OutfitMatchPage = () => {
     const [bookingModal, setBookingModal] = useState(null)
     const [arOverlay, setArOverlay] = useState(null)
     const [showCamera, setShowCamera] = useState(false)
-const [cameraStream, setCameraStream] = useState(null)
-const videoRef = React.useRef(null)
-const canvasRef = React.useRef(null)
+    const [cameraStream, setCameraStream] = useState(null)
+    const videoRef = React.useRef(null)
+    const canvasRef = React.useRef(null)
 
     const categories = [
         { id: 'all', label: 'All' },
@@ -76,22 +73,6 @@ const canvasRef = React.useRef(null)
         { id: 'tan', label: 'Tan' },
         { id: 'dark', label: 'Dark' }
     ]
-
-    // Preload TensorFlow.js model on mount
-    useEffect(() => {
-        const initModel = async () => {
-            try {
-                setModelStatus('loading')
-                await preloadModel()
-                setModelStatus('ready')
-                console.log('✅ AI Model ready')
-            } catch (err) {
-                setModelStatus('error')
-                console.error('❌ Failed to load AI model:', err)
-            }
-        }
-        initModel()
-    }, [])
 
     // Load favorites on mount
     useEffect(() => {
@@ -138,7 +119,7 @@ const canvasRef = React.useRef(null)
         try {
             setAnalysisStep('☁️ Sending to Gemini Vision AI...')
 
-            // Try to call backend API directly! Let Gemini do ALL the heavy lifting.
+            // Call backend API directly! Let Gemini do ALL the heavy lifting.
             try {
                 const result = await outfitService.match(file)
                 setApiConnected(true)
@@ -146,7 +127,7 @@ const canvasRef = React.useRef(null)
                 setAnalysisStep('🎨 Processing Gemini Results...')
                 await new Promise(r => setTimeout(r, 400)) // Tiny delay for smooth UX
 
-                // USE PURE GEMINI RESULTS! We completely ignore the local browser AI now.
+                // USE PURE GEMINI RESULTS!
                 setAnalysis({
                     detectedGender: result.analysis.detectedGender,
                     genderConfidence: result.analysis.genderConfidence,
@@ -178,40 +159,6 @@ const canvasRef = React.useRef(null)
         } finally {
             setIsAnalyzing(false)
         }
-    }
-
-    // Generate mock products based on AI detection
-    const generateMockProducts = (gender, colors) => {
-        const primaryColor = colors?.[0] || 'Blue'
-
-        // Products with slow_moving flag for AI suggestions to highlight
-        const menProducts = [
-            { id: 1, name: "Men's Classic White Shirt", category: 'tops', price: 4500, match_score: 95, match_reason: 'Perfect Color Match', image_url: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=400&fit=crop', color: 'White', gender: 'men', slow_moving: false },
-            { id: 2, name: "Men's Blue Denim Jeans", category: 'bottoms', price: 7500, match_score: 92, match_reason: 'Complementary Color', image_url: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop', color: 'Blue', gender: 'men', slow_moving: false },
-            { id: 3, name: "Men's Brown Leather Belt", category: 'accessories', price: 2500, match_score: 88, match_reason: 'Style Complement', image_url: 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=400&h=400&fit=crop', color: 'Brown', gender: 'men', slow_moving: true, discount: 20 },
-            { id: 4, name: "Men's Navy Blazer", category: 'tops', price: 18000, match_score: 90, match_reason: 'AI Recommended', image_url: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&fit=crop', color: 'Navy', gender: 'men', slow_moving: true, discount: 15 },
-            { id: 5, name: "Men's White Sneakers", category: 'shoes', price: 8500, match_score: 85, match_reason: 'Style Match', image_url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop', color: 'White', gender: 'men', slow_moving: false },
-            { id: 6, name: "Men's Khaki Chinos", category: 'bottoms', price: 5500, match_score: 83, match_reason: 'Color Complement', image_url: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=400&h=400&fit=crop', color: 'Khaki', gender: 'men', slow_moving: true, discount: 25 },
-            { id: 7, name: "Men's Silver Watch", category: 'accessories', price: 25000, match_score: 80, match_reason: 'Accessory Match', image_url: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=400&fit=crop', color: 'Silver', gender: 'men', slow_moving: false },
-            { id: 8, name: "Men's Brown Leather Shoes", category: 'shoes', price: 12000, match_score: 87, match_reason: 'Perfect Match', image_url: 'https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=400&h=400&fit=crop', color: 'Brown', gender: 'men', slow_moving: false }
-        ]
-
-        const womenProducts = [
-            { id: 1, name: "Women's White Blouse", category: 'tops', price: 4500, match_score: 95, match_reason: 'Perfect Color Match', image_url: 'https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=400&h=400&fit=crop', color: 'White', gender: 'women', slow_moving: false },
-            { id: 2, name: "Women's Blue Jeans", category: 'bottoms', price: 6500, match_score: 92, match_reason: 'Complementary Color', image_url: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=400&fit=crop', color: 'Blue', gender: 'women', slow_moving: false },
-            { id: 3, name: "Women's Gold Necklace", category: 'accessories', price: 15000, match_score: 88, match_reason: 'Style Complement', image_url: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop', color: 'Gold', gender: 'women', slow_moving: true, discount: 30 },
-            { id: 4, name: "Women's Black Dress", category: 'tops', price: 8500, match_score: 90, match_reason: 'AI Recommended', image_url: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=400&fit=crop', color: 'Black', gender: 'women', slow_moving: false },
-            { id: 5, name: "Women's White Sneakers", category: 'shoes', price: 7500, match_score: 85, match_reason: 'Style Complement', image_url: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop', color: 'White', gender: 'women', slow_moving: true, discount: 20 },
-            { id: 6, name: "Women's Black Skirt", category: 'bottoms', price: 4500, match_score: 83, match_reason: 'Color Complement', image_url: 'https://images.unsplash.com/photo-1583496661160-fb5886a0afe1?w=400&h=400&fit=crop', color: 'Black', gender: 'women', slow_moving: false },
-            { id: 7, name: "Women's Leather Handbag", category: 'accessories', price: 18000, match_score: 80, match_reason: 'Accessory Match', image_url: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop', color: 'Brown', gender: 'women', slow_moving: true, discount: 25 },
-            { id: 8, name: "Women's High Heels", category: 'shoes', price: 9500, match_score: 87, match_reason: 'Perfect Match', image_url: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&h=400&fit=crop', color: 'Black', gender: 'women', slow_moving: false }
-        ]
-
-        if (gender === 'men') return menProducts
-        if (gender === 'women') return womenProducts
-
-        // Mix for unisex
-        return [...menProducts.slice(0, 4), ...womenProducts.slice(0, 4)]
     }
 
     const toggleFavorite = async (productId) => {
@@ -251,63 +198,64 @@ const canvasRef = React.useRef(null)
         setError(null)
         setAnalysisStep('')
     }
-const openCamera = async () => {
-    try {
-        // Check if camera API is available
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            setError('Camera not supported on this connection. Please use HTTPS or localhost.')
-            return
-        }
 
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: 'environment' } 
-        })
-        setCameraStream(stream)
-        setShowCamera(true)
-        setTimeout(() => {
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream
+    const openCamera = async () => {
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                setError('Camera not supported on this connection. Please use HTTPS or localhost.')
+                return
             }
-        }, 100)
-    } catch (err) {
-        console.error('Camera error:', err)
-        if (err.name === 'NotAllowedError') {
-            setError('Camera permission denied. Please allow camera access in your browser settings.')
-        } else if (err.name === 'NotFoundError') {
-            setError('No camera found on this device.')
-        } else {
-            setError('Camera not available. Try using HTTPS or upload a photo instead.')
+
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment' } 
+            })
+            setCameraStream(stream)
+            setShowCamera(true)
+            setTimeout(() => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream
+                }
+            }, 100)
+        } catch (err) {
+            console.error('Camera error:', err)
+            if (err.name === 'NotAllowedError') {
+                setError('Camera permission denied. Please allow camera access in your browser settings.')
+            } else if (err.name === 'NotFoundError') {
+                setError('No camera found on this device.')
+            } else {
+                setError('Camera not available. Try using HTTPS or upload a photo instead.')
+            }
         }
     }
-}
 
-const closeCamera = () => {
-    if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop())
-        setCameraStream(null)
+    const closeCamera = () => {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop())
+            setCameraStream(null)
+        }
+        setShowCamera(false)
     }
-    setShowCamera(false)
-}
 
-const capturePhoto = () => {
-    const video = videoRef.current
-    const canvas = canvasRef.current
-    if (!video || !canvas) return
+    const capturePhoto = () => {
+        const video = videoRef.current
+        const canvas = canvasRef.current
+        if (!video || !canvas) return
 
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(video, 0, 0)
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(video, 0, 0)
 
-    canvas.toBlob(async (blob) => {
-        const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' })
-        const imageUrl = URL.createObjectURL(blob)
-        setUploadedImage(imageUrl)
-        setUploadedFile(file)
-        closeCamera()
-        await analyzeImage(file)
-    }, 'image/jpeg', 0.9)
-}
+        canvas.toBlob(async (blob) => {
+            const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' })
+            const imageUrl = URL.createObjectURL(blob)
+            setUploadedImage(imageUrl)
+            setUploadedFile(file)
+            closeCamera()
+            await analyzeImage(file)
+        }, 'image/jpeg', 0.9)
+    }
+
     return (
         <div className="outfit-page">
             <div className="outfit-bg-gradient" />
@@ -323,13 +271,11 @@ const capturePhoto = () => {
                     >
                         <span className="page-label">AI Outfit Match</span>
                         <h1>Find Your Perfect <span className="gradient-text-accent">Style Match</span></h1>
-                        <p>Upload a photo and our TensorFlow.js AI will analyze it to recommend matching outfits</p>
+                        <p>Upload a photo and our Gemini Vision AI will analyze it to recommend matching outfits</p>
 
                         {/* Model Status */}
-                        <div className={`model-status ${modelStatus}`}>
-                            {modelStatus === 'loading' && <><FiLoader className="spin" /> Loading AI Model...</>}
-                            {modelStatus === 'ready' && <><FiCheck /> AI Model Ready (MobileNet)</>}
-                            {modelStatus === 'error' && <><FiAlertCircle /> AI Model Error - Using Fallback</>}
+                        <div className="model-status ready">
+                            <FiCheck /> AI Model Ready (Gemini Cloud)
                         </div>
 
                         {!apiConnected && (
@@ -370,28 +316,28 @@ const capturePhoto = () => {
                                 transition={{ duration: 0.5 }}
                             >
                                 {!uploadedImage ? (
-    <>
-        <label className="upload-area">
-            <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                hidden
-            />
-            <div className="upload-icon">
-                <FiUpload />
-            </div>
-            <h3>Upload Your Photo</h3>
-            <p>Drag and drop or click to upload</p>
-            <span className="upload-hint">Supports JPG, PNG, WebP up to 10MB</span>
-            <div className="ai-detect-badge">
-                <FiCpu /> TensorFlow.js + MobileNet
-            </div>
-        </label>
-        <button className="camera-btn" onClick={openCamera}>
-            <FiCamera /> Use Camera
-        </button>
-    </>
+                                    <>
+                                        <label className="upload-area">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                hidden
+                                            />
+                                            <div className="upload-icon">
+                                                <FiUpload />
+                                            </div>
+                                            <h3>Upload Your Photo</h3>
+                                            <p>Drag and drop or click to upload</p>
+                                            <span className="upload-hint">Supports JPG, PNG, WebP up to 10MB</span>
+                                            <div className="ai-detect-badge">
+                                                <FiCpu /> Gemini Cloud AI
+                                            </div>
+                                        </label>
+                                        <button className="camera-btn" onClick={openCamera}>
+                                            <FiCamera /> Use Camera
+                                        </button>
+                                    </>
                                 ) : (
                                     <div className="uploaded-preview">
                                         <img src={uploadedImage} alt="Uploaded" />
@@ -403,14 +349,15 @@ const capturePhoto = () => {
                                                 <div className="analyzing-spinner" />
                                                 <span>{analysisStep || 'Analyzing with AI...'}</span>
                                                 <div className="ai-badge">
-                                                    <FiCpu /> TensorFlow.js
+                                                    <FiCpu /> Gemini AI
                                                 </div>
                                             </div>
                                         )}
                                     </div>
                                 )}
                             </motion.div>
-{/* Camera Modal */}
+                            
+                            {/* Camera Modal */}
                             {showCamera && (
                                 <div className="camera-modal-overlay">
                                     <div className="camera-modal">
@@ -431,6 +378,7 @@ const capturePhoto = () => {
                                     </div>
                                 </div>
                             )}
+
                             {uploadedImage && !isAnalyzing && analysis && (
                                 <motion.div
                                     className="analysis-result"
@@ -603,7 +551,7 @@ const capturePhoto = () => {
                                                         {product.slow_moving ? '💎 Special Deal - Limited Stock!' : product.match_reason}
                                                     </div>
 
-                                                    {/* AR Try-On Button - Prominent */}
+                                                    {/* AR Try-On Button */}
                                                     <button
                                                         className="ar-tryon-main-btn"
                                                         onClick={() => setArOverlay(product)}
@@ -694,11 +642,11 @@ const capturePhoto = () => {
                                 <div className="empty-results">
                                     <FiUpload />
                                     <h3>Upload an Image to Get Started</h3>
-                                    <p>Our TensorFlow.js AI will analyze your photo in real-time and recommend matching outfits</p>
+                                    <p>Our Gemini Vision AI will analyze your photo and recommend matching outfits instantly.</p>
                                     <div className="ai-features">
-                                        <span>🤖 MobileNet Classification</span>
-                                        <span>🎨 Color Detection</span>
-                                        <span>👔 Gender Inference</span>
+                                        <span>🤖 Gemini Flash 1.5</span>
+                                        <span>🎨 Smart Color Detection</span>
+                                        <span>👔 Style Inference</span>
                                     </div>
                                 </div>
                             )}
