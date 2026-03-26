@@ -1369,8 +1369,7 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
         // 1. Initialize Gemini Model
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
-            // Force the AI to respond in pure JSON so our app doesn't crash
+            model: "gemini-2.5-flash", // 👈 The absolute smartest model available
             generationConfig: { responseMimeType: "application/json" }
         });
 
