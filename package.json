@@ -11,6 +11,7 @@
     "server": "node server/server.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@react-three/drei": "^9.88.0",
     "@react-three/fiber": "^8.15.0",
     "@tensorflow-models/mobilenet": "^2.1.1",

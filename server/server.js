@@ -12,6 +12,7 @@ import { fileURLToPath } from 'url'
 import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
 import nodemailer from 'nodemailer'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -1352,97 +1353,87 @@ const genderKeywords = {
     women: ['woman', 'girl', 'female', 'lady', 'women', 'feminine', 'dress', 'skirt', 'heels']
 }
 
-// Upload image and get outfit recommendations
+// Upload image and get REAL AI outfit recommendations using Gemini 1.5 Flash
 app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No image uploaded' })
         }
 
+        const imagePath = req.file.path
         const imageUrl = `/uploads/${req.file.filename}`
         const { occasion, bodyType, skinTone, gender: userSpecifiedGender } = req.body || {}
 
-        // ========================================
-        // SMART AI GENDER DETECTION
-        // Analyzes image filename and common clothing patterns
-        // In production: Use CLIP, AWS Rekognition Face, or Google Vision Person API
-        // ========================================
+        console.log(`🤖 Sending image to Gemini Vision API...`);
+        
+        // 1. Initialize Gemini Model
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            // Force the AI to respond in pure JSON so our app doesn't crash
+            generationConfig: { responseMimeType: "application/json" }
+        });
 
-        // Keywords for gender detection from filename/context
-        const menKeywords = ['man', 'boy', 'male', 'guy', 'men', 'gentleman', 'shirt', 'blazer', 'polo', 'suit', 'tie', 'beard']
-        const womenKeywords = ['woman', 'girl', 'female', 'lady', 'women', 'dress', 'skirt', 'blouse', 'heels', 'lipstick', 'purse', 'handbag']
-
-        let detectedGender = userSpecifiedGender || null
-        let genderConfidence = 0
-
-        // Smart detection from image filename (simulating CLIP analysis)
-        const filename = req.file.originalname.toLowerCase()
-
-        if (!detectedGender) {
-            // Check filename for gender hints
-            const menScore = menKeywords.filter(kw => filename.includes(kw)).length
-            const womenScore = womenKeywords.filter(kw => filename.includes(kw)).length
-
-            if (menScore > womenScore) {
-                detectedGender = 'men'
-                genderConfidence = Math.min(95, 75 + menScore * 10)
-            } else if (womenScore > menScore) {
-                detectedGender = 'women'
-                genderConfidence = Math.min(95, 75 + womenScore * 10)
-            } else {
-                // No clear indicator - analyze file size and default intelligently
-                // In production: Use actual face/body detection API
-                // For demo: Default to unisex but weight based on image characteristics
-                detectedGender = 'unisex'
-                genderConfidence = 70
+        // 2. Convert the uploaded image into a format Gemini can read
+        const imagePart = {
+            inlineData: {
+                data: Buffer.from(fs.readFileSync(imagePath)).toString("base64"),
+                mimeType: req.file.mimetype
             }
+        };
+
+        // 3. The Prompt - Telling the AI exactly how to act
+        const prompt = `You are an expert fashion stylist AI. Analyze this clothing image. 
+        Provide the following details in a strict JSON format:
+        - "detectedGender": strictly "men", "women", or "unisex".
+        - "genderConfidence": a number between 1 and 100.
+        - "primaryColor": the dominant color (e.g., "Black", "Blue", "White", "Red", "Green", "Yellow", "Grey", "Brown", "Pink", "Purple", "Orange", "Beige", "Cream").
+        - "detectedColors": an array of up to 3 colors seen in the item.
+        - "detectedStyles": an array of 2 style categories (e.g., "Casual", "Formal", "Smart Casual", "Streetwear", "Sporty", "Elegant", "Bohemian", "Classic").
+        - "suggestedOccasions": an array of 2-3 suitable occasions (e.g., "Daily Wear", "Office", "Dinner Date", "Gym").
+        - "confidence": overall confidence score between 1 and 100.
+        Return ONLY valid JSON.`;
+
+        // 4. Wait for the AI to analyze the actual pixels!
+        const aiResponse = await model.generateContent([prompt, imagePart]);
+        const aiData = JSON.parse(aiResponse.response.text());
+        
+        console.log(`✅ Gemini Analysis Complete:`, aiData);
+
+        // 5. Extract the REAL data from the AI
+        const detectedGender = userSpecifiedGender || aiData.detectedGender || 'unisex';
+        const genderConfidence = userSpecifiedGender ? 100 : (aiData.genderConfidence || 85);
+        const primaryColor = aiData.primaryColor || 'Black';
+        const detectedColors = aiData.detectedColors || [primaryColor];
+        const detectedStyles = aiData.detectedStyles || ['Casual'];
+        const suggestedOccasions = aiData.suggestedOccasions || ['Daily Wear'];
+        const confidence = aiData.confidence || 90;
+
+        // Color wheel logic for complementary color matching
+        const colorWheel = {
+            'White': ['Black', 'Navy', 'Blue', 'Grey', 'Red', 'Pink'],
+            'Black': ['White', 'Red', 'Pink', 'Yellow', 'Grey', 'Cream'],
+            'Blue': ['White', 'Cream', 'Brown', 'Orange', 'Grey', 'Beige'],
+            'Navy': ['White', 'Cream', 'Beige', 'Pink', 'Yellow', 'Grey'],
+            'Red': ['White', 'Black', 'Cream', 'Navy', 'Grey', 'Beige'],
+            'Green': ['White', 'Brown', 'Beige', 'Cream', 'Black', 'Grey'],
+            'Yellow': ['Black', 'Navy', 'Grey', 'Purple', 'Blue', 'White'],
+            'Grey': ['White', 'Black', 'Pink', 'Blue', 'Navy', 'Red'],
+            'Brown': ['White', 'Cream', 'Beige', 'Blue', 'Green', 'Orange'],
+            'Pink': ['White', 'Grey', 'Navy', 'Black', 'Cream', 'Blue'],
+            'Purple': ['White', 'Yellow', 'Grey', 'Black', 'Cream', 'Pink'],
+            'Orange': ['White', 'Navy', 'Blue', 'Brown', 'Cream', 'Black'],
+            'Beige': ['Navy', 'Brown', 'White', 'Black', 'Blue', 'Green'],
+            'Cream': ['Navy', 'Brown', 'Black', 'Blue', 'Red', 'Green']
         }
 
-        if (userSpecifiedGender) {
-            genderConfidence = 100 // User specified overrides
-        }
+        const complementaryColors = colorWheel[primaryColor] || ['White', 'Black', 'Grey'];
 
-        // ========================================
-        // AI COLOR & STYLE DETECTION SIMULATION
-        // In production: Use Google Vision, AWS Rekognition, OpenAI Vision, or CLIP
-        // ========================================
-
-        const allColors = Object.keys(colorWheel)
-        const allStyles = Object.keys(styleOccasions)
-
-        // Simulate CLIP-based vision model color extraction (90%+ accuracy simulation)
-        // In real implementation, you'd analyze the actual image pixels
-        const primaryColor = allColors[Math.floor(Math.random() * allColors.length)]
-        const complementaryColors = colorWheel[primaryColor] || ['White', 'Black', 'Grey']
-
-        // Detected colors from "AI analysis" - primary + 1-2 secondary
-        const detectedColors = [
-            primaryColor,
-            ...complementaryColors.slice(0, Math.floor(Math.random() * 2) + 1)
-        ]
-
-        // Style detection based on "AI analysis"
-        const detectedStyles = allStyles
-            .sort(() => 0.5 - Math.random())
-            .slice(0, Math.floor(Math.random() * 2) + 2)
-
-        // Get suggested occasions based on detected styles
-        const suggestedOccasions = detectedStyles
-            .flatMap(style => styleOccasions[style] || [])
-            .slice(0, 4)
-
-        // Calculate confidence (simulating CLIP model output)
-        const confidence = Math.floor(88 + Math.random() * 10) // 88-97%
-
-        // ========================================
-        // SMART PRODUCT MATCHING - 5-10 INSTANT COMPLEMENTS
-        // ========================================
-
-        // Build smart matching query prioritizing complementary colors
+        // Build smart matching query based on REAL AI visual data
         const allMatchColors = [...detectedColors, ...complementaryColors.slice(0, 3)]
         const colorConditions = allMatchColors.map(c => `color LIKE '%${c}%'`).join(' OR ')
 
-        // Get products with intelligent scoring
+        // Get products from your database that match what the AI saw
         const [products] = await pool.query(`
             SELECT p.*,
                 CASE
@@ -1467,7 +1458,6 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
             LIMIT 12
         `, [detectedGender, detectedGender])
 
-        // Group products by category for complete outfit suggestion
         const outfitSuggestion = {
             tops: products.filter(p => p.category === 'tops').slice(0, 3),
             bottoms: products.filter(p => p.category === 'bottoms').slice(0, 2),
@@ -1475,10 +1465,9 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
             accessories: products.filter(p => p.category === 'accessories').slice(0, 3)
         }
 
-        // Sort all by match score
         products.sort((a, b) => b.match_score - a.match_score)
 
-        // Save to database if user is authenticated
+        // Save to database
         let matchId = null
         if (req.userId) {
             const [result] = await pool.query(
