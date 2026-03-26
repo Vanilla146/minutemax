@@ -1382,9 +1382,9 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
         };
 
         // 3. The Prompt - Telling the AI exactly how to act
-        // 3. The Prompt - Telling the AI exactly how to act
         const prompt = `You are an expert fashion stylist AI. Analyze this clothing image. 
         Provide the following details in a strict JSON format:
+        - "itemDescription": a short 2-4 word description of the specific item (e.g., "Checkered Shirt", "Leopard Print Blouse", "Denim Jacket").
         - "detectedCategory": strictly one of "tops", "bottoms", "shoes", "accessories", or "full-body".
         - "detectedGender": strictly "men", "women", or "unisex".
         - "genderConfidence": a number between 1 and 100.
@@ -1402,6 +1402,7 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
         console.log(`✅ Gemini Analysis Complete:`, aiData);
 
         // 5. Extract the REAL data from the AI
+        const itemDescription = aiData.itemDescription || 'Clothing Item'; // 👈 ADD THIS
         const uploadedCategory = aiData.detectedCategory || 'tops'; // 👈 ADDED THIS LINE
         const detectedGender = userSpecifiedGender || aiData.detectedGender || 'unisex';
         const genderConfidence = userSpecifiedGender ? 100 : (aiData.genderConfidence || 85);
@@ -1496,6 +1497,7 @@ app.post('/api/outfit-match', optionalAuth, upload.single('image'), async (req, 
             matchId,
             uploadedImage: imageUrl,
             analysis: {
+                itemDescription,
                 detectedGender,
                 genderConfidence,
                 detectedColors,

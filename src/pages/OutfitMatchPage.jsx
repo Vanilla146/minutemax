@@ -129,6 +129,7 @@ const OutfitMatchPage = () => {
 
                 // USE PURE GEMINI RESULTS!
                 setAnalysis({
+                    itemDescription: result.analysis.itemDescription,
                     detectedGender: result.analysis.detectedGender,
                     genderConfidence: result.analysis.genderConfidence,
                     detectedColors: result.analysis.detectedColors,
@@ -396,6 +397,14 @@ const OutfitMatchPage = () => {
                                         <div className="ai-predictions">
                                             <label>AI Detected:</label>
                                             <div className="prediction-tags">
+                                                {/* ✨ NEW: The specific item description */}
+                                                {analysis.itemDescription && (
+                                                    <span className="prediction-tag" style={{ background: '#f3e8ff', color: '#6b21a8' }}>
+                                                        ✨ {analysis.itemDescription}
+                                                    </span>
+                                                )}
+                                                
+                                                {/* The Style Category (e.g. Smart Casual) */}
                                                 {analysis.aiPredictions.map((pred, i) => (
                                                     <span key={i} className="prediction-tag">
                                                         {pred.className} ({Math.round(pred.probability * 100)}%)
