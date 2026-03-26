@@ -37,7 +37,7 @@ const EMAIL_CONFIG = {
         pass: 'hdzu yzkx taug ewky' // Replace with your App Password (16 characters)
     }
 }
-const axios = require('axios'); // Make sure you have axios installed!
+
 
 // OneSignal Push Notification Helper
 // OneSignal Push Notification Helper
