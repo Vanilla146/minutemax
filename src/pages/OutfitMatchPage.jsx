@@ -136,74 +136,38 @@ const canvasRef = React.useRef(null)
         setError(null)
 
         try {
-            // Step 1: AI Image Classification with TensorFlow.js
-            setAnalysisStep('🤖 Loading AI model...')
+            setAnalysisStep('☁️ Sending to Gemini Vision AI...')
 
-            if (modelStatus !== 'ready') {
-                await preloadModel()
-            }
-
-            setAnalysisStep('🔍 Analyzing image with AI...')
-            await new Promise(r => setTimeout(r, 300))
-
-            // Use TensorFlow.js to classify the image
-            const aiResult = await classifyImage(file)
-            console.log('🎯 AI Classification result:', aiResult)
-
-            setAnalysisStep('👔 Detecting clothing type...')
-            await new Promise(r => setTimeout(r, 300))
-
-            setAnalysisStep('🎨 Extracting colors...')
-            await new Promise(r => setTimeout(r, 300))
-
-            setAnalysisStep('✨ Finding matching outfits...')
-
-            // Try to call backend API with AI-detected gender
+            // Try to call backend API directly! Let Gemini do ALL the heavy lifting.
             try {
-                const result = await outfitService.match(file, aiResult.detectedGender)
+                const result = await outfitService.match(file)
                 setApiConnected(true)
 
-                // Merge AI analysis with API results
+                setAnalysisStep('🎨 Processing Gemini Results...')
+                await new Promise(r => setTimeout(r, 400)) // Tiny delay for smooth UX
+
+                // USE PURE GEMINI RESULTS! We completely ignore the local browser AI now.
                 setAnalysis({
-                    ...result.analysis,
-                    detectedGender: aiResult.detectedGender,
-                    genderConfidence: aiResult.genderConfidence,
-                    detectedColors: aiResult.detectedColors,
-                    complementaryColors: aiResult.complementaryColors,
-                    clothingType: aiResult.clothingType,
-                    confidence: aiResult.confidence,
-                    aiPredictions: aiResult.predictions?.slice(0, 3)
+                    detectedGender: result.analysis.detectedGender,
+                    genderConfidence: result.analysis.genderConfidence,
+                    detectedColors: result.analysis.detectedColors,
+                    complementaryColors: result.analysis.complementaryColors,
+                    detectedStyles: result.analysis.detectedStyles,
+                    suggestedOccasions: result.analysis.suggestedOccasions,
+                    confidence: result.analysis.confidence,
+                    // Create a nice UI tag using Gemini's style data
+                    aiPredictions: [{ 
+                        className: result.analysis.detectedStyles[0] || 'Fashion Item', 
+                        probability: (result.analysis.confidence / 100) || 0.95 
+                    }] 
                 })
                 setMatchedOutfits(result.recommendations)
                 setOutfitSuggestion(result.outfitSuggestion)
                 setInstantComplements(result.instantComplements || [])
             } catch (apiErr) {
-                console.log('API not available, using AI results with mock products')
+                console.log('API not available', apiErr)
                 setApiConnected(false)
-
-                // Use AI results directly
-                setAnalysis({
-                    detectedGender: aiResult.detectedGender,
-                    genderConfidence: Math.round(aiResult.genderConfidence * 100),
-                    detectedColors: aiResult.detectedColors,
-                    complementaryColors: aiResult.complementaryColors,
-                    clothingType: aiResult.clothingType,
-                    detectedStyles: ['Casual', 'Modern'],
-                    suggestedOccasions: ['Daily Wear', 'Weekend', 'Shopping'],
-                    confidence: aiResult.confidence,
-                    aiPredictions: aiResult.predictions?.slice(0, 3)
-                })
-
-                // Generate mock products based on AI detection
-                const mockProducts = generateMockProducts(aiResult.detectedGender, aiResult.detectedColors)
-                setMatchedOutfits(mockProducts)
-                setInstantComplements(mockProducts.slice(0, 5).map(p => ({
-                    id: p.id,
-                    name: p.name,
-                    category: p.category,
-                    matchScore: p.match_score,
-                    reason: p.match_reason
-                })))
+                setError('Backend AI is offline. Please check server logs.')
             }
 
             setAnalysisStep('')
