@@ -88,6 +88,21 @@ const QueuePage = () => {
     const [lastNotifiedPosition, setLastNotifiedPosition] = useState(null)
     const [showVisualQueue, setShowVisualQueue] = useState(true)
    const [checkingStatus, setCheckingStatus] = useState(false)
+   // 👉 NEW: WebView Detection State
+    const [isInAppBrowser, setIsInAppBrowser] = useState(false)
+
+    // 👉 NEW: Run detection immediately on load
+    useEffect(() => {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera
+        
+        // This regex catches Instagram, Facebook, Snapchat, WeChat, Line, and generic Android/iOS WebViews
+        const isWebView = /(Instagram|Snapchat|FBAV|FBAN|MicroMessenger|Line|wv|WebView)/i.test(userAgent)
+        
+        if (isWebView) {
+            console.log("🛑 In-App Browser detected. Blocking UI.")
+            setIsInAppBrowser(true)
+        }
+    }, [])
 
     // Request notification permission on mount
     useEffect(() => {
@@ -470,8 +485,31 @@ localStorage.removeItem('guestQueueType')
         loadStoreAndQueue()
     }
 const SelectedIcon = selectedQueue?.icon || null
-    return (
+return (
         <div className="queue-page">
+            {isInAppBrowser ? (
+                // 🛑 THE BLOCKER SCREEN
+                <div className="webview-warning" style={{ 
+                    height: '100vh', display: 'flex', flexDirection: 'column', 
+                    justifyContent: 'center', alignItems: 'center', padding: '30px', 
+                    textAlign: 'center', background: '#ffffff', zIndex: 9999, 
+                    position: 'fixed', inset: 0 
+                }}>
+                    <h1 style={{ fontSize: '56px', margin: '0 0 20px 0' }}>🛑</h1>
+                    <h2 style={{ margin: '0 0 15px 0', color: '#171717', fontSize: '24px' }}>Action Required</h2>
+                    <p style={{ margin: '0 0 30px 0', color: '#676869', lineHeight: '1.6', fontSize: '16px', maxWidth: '400px' }}>
+                        You are currently using an in-app browser. <strong>Push notifications are blocked here</strong>, which means you will not be alerted when it is your turn.
+                    </p>
+                    <div style={{ background: '#f8f9fa', padding: '24px', borderRadius: '12px', border: '1px solid #e5e5e5', width: '100%', maxWidth: '400px' }}>
+                        <h3 style={{ margin: '0 0 12px 0', color: '#171717', fontSize: '16px' }}>How to fix this:</h3>
+                        <p style={{ margin: 0, fontSize: '14px', color: '#676869', lineHeight: '1.5' }}>
+                            Tap the <strong>three dots [•••]</strong> in the top right corner of your screen, and select <strong>"Open in System Browser"</strong> or <strong>"Open in Safari/Chrome"</strong>.
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                // ✅ THE NORMAL APP UI
+                <>
             {/* Background */}
             <div className="queue-bg-gradient" />
 
@@ -735,6 +773,9 @@ const SelectedIcon = selectedQueue?.icon || null
                     </motion.div>
                 </div>
             </section>
+        </>
+        )} 
+        {/* ^^^ ADD THESE TWO LINES TO CLOSE THE BLOCKER CONDITION ^^^ */}
         </div>
     )
 }
