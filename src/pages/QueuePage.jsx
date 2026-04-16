@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { FiUsers, FiClock, FiCheckCircle, FiAlertCircle, FiHash, FiMapPin, FiBell, FiLoader, FiShoppingCart, FiMaximize2 } from 'react-icons/fi'
+import { FiUsers, FiClock, FiCheckCircle, FiAlertCircle, FiHash, FiMapPin, FiBell, FiLoader, FiShoppingCart, FiMaximize2, FiRefreshCw } from 'react-icons/fi'
 import { QRCodeSVG } from 'qrcode.react'
 import { useTranslation } from 'react-i18next'
 import api, { queueService, storeService } from '../services/api'
@@ -90,6 +90,7 @@ const QueuePage = () => {
    const [checkingStatus, setCheckingStatus] = useState(false)
    // 👉 NEW: WebView Detection State
     const [isInAppBrowser, setIsInAppBrowser] = useState(false)
+    const [isRefreshing, setIsRefreshing] = useState(false)
 
     // 👉 NEW: Run detection immediately on load
     useEffect(() => {
@@ -652,10 +653,27 @@ return (
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                 >
-                                    <button className="back-btn" onClick={leaveQueue}>← Leave queue</button>
-<button className="btn btn-secondary" onClick={refreshQueue} style={{padding: '6px 12px', fontSize: '13px'}}>
-    🔄 Refresh
-</button>
+                                    <div className="queue-actions-header">
+    <button className="back-btn" onClick={leaveQueue}>← Leave queue</button>
+    
+    <button 
+        className="refresh-btn" 
+        onClick={async () => {
+            setIsRefreshing(true);
+            await refreshQueue();
+            // Keep spinning for at least 500ms so it feels responsive
+            setTimeout(() => setIsRefreshing(false), 500); 
+        }}
+    >
+        <motion.div
+            animate={{ rotate: isRefreshing ? 360 : 0 }}
+            transition={{ duration: 0.5, ease: "linear", repeat: isRefreshing ? Infinity : 0 }}
+        >
+            <FiRefreshCw />
+        </motion.div>
+        Refresh
+    </button>
+</div>  
 
                                     <div className="status-header">
                                         <div className="status-icon" style={{ background: selectedQueue.color }}>

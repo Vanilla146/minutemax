@@ -281,7 +281,54 @@
 .back-btn:hover {
     color: #171717;
 }
+/* Queue Actions Header (Holds Back & Refresh buttons) */
+.queue-actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    width: 100%;
+}
 
+.back-btn {
+    /* Keep your existing back-btn styles, just remove the margin-bottom */
+    background: none;
+    border: none;
+    color: #676869;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0; /* Changed this */
+}
+
+/* Modern Animated Refresh Button */
+.refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 20px;
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+    background: #e5e7eb;
+    color: #171717;
+}
+
+.refresh-btn svg {
+    font-size: 14px;
+}
 /* Smart Queue Detection */
 .smart-queue-detect {
     background: #fafafa;
@@ -478,6 +525,7 @@
     flex-direction: column;
     align-items: center;
     padding: 20px;
+    margin-top: 24px;
     margin-bottom: 20px;
     background: #fafafa;
     border: 1px solid #e5e5e5;

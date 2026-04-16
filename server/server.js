@@ -132,7 +132,7 @@ const checkAndSendQueueNotifications = async () => {
     try {
         const connection = await pool.getConnection()
 
-        // 👉 UPDATED SELECT QUERY TO GRAB os_player_id
+        // SELECT QUERY TO GRAB os_player_id
         const [usersToNotify] = await connection.query(`
             SELECT q.id, q.user_id, q.queue_type, q.position, q.notified_at, q.os_player_id,
                    u.name, u.email, u.phone,
@@ -158,7 +158,7 @@ const checkAndSendQueueNotifications = async () => {
 
                 await sendEmailNotification(user.email, subject, body)
 
-                // 👉 NEW: SEND THE ONESIGNAL PUSH NOTIFICATION HERE!
+                // SEND THE ONESIGNAL PUSH NOTIFICATION HERE!
                 if (user.os_player_id) {
                     await sendOneSignalPush(user.os_player_id, subject, body);
                 }
@@ -452,7 +452,19 @@ position INT NOT NULL,
         } catch (err) {
             // Column already exists or other error - ignore
         }
-
+// Add called_at column if it doesn't exist to track exact service time
+        try {
+            const [columns] = await connection.query(`
+                SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = 'minutemax' AND TABLE_NAME = 'queues' AND COLUMN_NAME = 'called_at'
+            `)
+            if (columns.length === 0) {
+                await connection.query('ALTER TABLE queues ADD COLUMN called_at TIMESTAMP NULL')
+                console.log('📋 Added called_at column to queues table')
+            }
+        } catch (err) {
+            // Ignore
+        }
         // Products table with gender column
         await connection.query(`
       CREATE TABLE IF NOT EXISTS products (
@@ -802,7 +814,39 @@ app.get('/api/stores/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch store' })
     }
 })
+// ==========================================
+// DYNAMIC WAIT TIME CALCULATOR
+// ==========================================
+const calculateDynamicWaitTime = async (queueType, position) => {
+    try {
+        // Calculate the average time spent in the 'called' state TODAY
+        const [rows] = await pool.query(`
+            SELECT AVG(TIMESTAMPDIFF(MINUTE, called_at, completed_at)) as avgServiceTime
+            FROM queues
+            WHERE queue_type = ? 
+              AND status = 'completed' 
+              AND called_at IS NOT NULL 
+              AND completed_at IS NOT NULL
+              AND DATE(completed_at) = CURDATE()
+        `, [queueType]);
 
+        let avgTime = rows[0].avgServiceTime;
+
+        // Fallback defaults if no one has completed the queue today yet
+        if (!avgTime || avgTime < 1) {
+            avgTime = queueType === 'checkout' ? 3 : 8; 
+        }
+
+        // SAFEGUARD: Cap maximums so glitches don't ruin the math
+        if (queueType === 'fitting_room' && avgTime > 15) avgTime = 15;
+        if (queueType === 'checkout' && avgTime > 8) avgTime = 8;
+
+        return Math.round(position * avgTime);
+    } catch (error) {
+        console.error("Wait time calculation error:", error);
+        return position * (queueType === 'checkout' ? 3 : 8);
+    }
+}
 // ========================
 // QUEUE ROUTES (Single Store)
 // ========================
@@ -825,12 +869,16 @@ app.get('/api/queue/status/:queueId', async (req, res) => {
     'SELECT COUNT(*) as count FROM queues WHERE store_id = ? AND queue_type = ? AND status = "waiting"',
     [queue[0].store_id, queue[0].queue_type]
 )
-res.json({
-    status: 'waiting',
-    position: ahead[0].count + 1,
-    totalInQueue: total[0].count,
-    estimatedWait: (ahead[0].count + 1) * (queue[0].queue_type === 'checkout' ? 3 : 8)
-})
+// 👉 NEW: Dynamic wait time math
+        const actualPosition = ahead[0].count + 1;
+        const dynamicWait = await calculateDynamicWaitTime(queue[0].queue_type, actualPosition);
+
+        res.json({
+            status: 'waiting',
+            position: actualPosition,
+            totalInQueue: total[0].count,
+            estimatedWait: dynamicWait 
+        })
     } catch (error) {
         res.status(500).json({ error: 'Failed to get queue status' })
     }
@@ -869,10 +917,10 @@ app.get('/api/queue/status', async (req, res) => {
     }
 })
 
-// Join queue (single store - no storeId required)
+// Join queue
 app.post('/api/queue/join', optionalAuth, async (req, res) => {
     try {
-        // 👉 ADD osPlayerId HERE
+        
         const { queueType, customerName, customerPhone, osPlayerId } = req.body
         const storeId = 1 
         const userId = req.userId || null
@@ -926,20 +974,22 @@ const [ahead] = await pool.query(
     [storeId, queueType, result.insertId]
 )
 
-const actualPosition = ahead[0].count + 1
+//Dynamic wait time math
+        const actualPosition = ahead[0].count + 1;
+        const dynamicWait = await calculateDynamicWaitTime(queueType, actualPosition);
 
-res.status(201).json({
-    success: true,
-    message: 'Joined queue successfully',
-    queue: {
-        id: result.insertId,
-        token: tokenNumber,
-        queue_type: queueType,
-        position: actualPosition,
-        estimatedWait: actualPosition * (queueType === 'checkout' ? 3 : 8),
-        peopleAhead: ahead[0].count
-    }
-})
+        res.status(201).json({
+            success: true,
+            message: 'Joined queue successfully',
+            queue: {
+                id: result.insertId,
+                token: tokenNumber,
+                queue_type: queueType,
+                position: actualPosition,
+                estimatedWait: dynamicWait,
+                peopleAhead: ahead[0].count
+            }
+        })
     } catch (error) {
         console.error('Join queue error:', error)
         res.status(500).json({ error: 'Failed to join queue' })
@@ -971,9 +1021,9 @@ app.post('/api/queue/call-next', async (req, res) => {
 
         const customer = firstInQueue[0]
 
-        // Mark as called
+        // Mark as called AND stamp the start time
         await pool.query(
-            'UPDATE queues SET status = "called" WHERE id = ?',
+            'UPDATE queues SET status = "called", called_at = NOW() WHERE id = ?',
             [customer.id]
         )
 
