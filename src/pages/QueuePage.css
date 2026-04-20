@@ -135,8 +135,9 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 32px;
-    align-items: start;
+    align-items: stretch; /* 👉 CHANGED THIS */
 }
+
 
 /* Queue Panel */
 .queue-panel {

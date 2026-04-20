@@ -1,9 +1,9 @@
 import { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Float, Environment, Box, Sphere, RoundedBox, Text } from '@react-three/drei'
+import { Float, Environment, Box, Sphere, RoundedBox, Text, ContactShadows } from '@react-three/drei'
 import * as THREE from 'three'
 
-// Animated queue person
+// Animated queue person (Modern Soft "Clay" Look)
 const QueuePerson = ({ position, index, isServed, isUser, color, scale = 1 }) => {
     const groupRef = useRef()
     const targetX = useRef(position[0])
@@ -11,51 +11,52 @@ const QueuePerson = ({ position, index, isServed, isUser, color, scale = 1 }) =>
     useFrame((state, delta) => {
         if (groupRef.current) {
             // Subtle floating animation
-            groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + index) * 0.05
+            groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + index) * 0.03
 
             // Move forward in queue animation
-            const speed = 2
+            const speed = 3
             groupRef.current.position.x += (targetX.current - groupRef.current.position.x) * delta * speed
         }
     })
 
-    const personColor = isServed ? '#10b981' : isUser ? '#f093fb' : color || '#667eea'
+    // Softer, modern colors
+    const personColor = isServed ? '#10b981' : isUser ? '#d946ef' : color || '#8b5cf6'
 
     return (
-        <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.3}>
+        <Float speed={2} rotationIntensity={0.05} floatIntensity={0.2}>
             <group ref={groupRef} position={position} scale={[scale, scale, scale]}>
                 {/* Head */}
                 <Sphere args={[0.12, 32, 32]} position={[0, 0.35, 0]}>
-                    <meshPhysicalMaterial
+                    <meshStandardMaterial
                         color={personColor}
-                        roughness={0.2}
-                        metalness={0.8}
-                        clearcoat={1}
+                        roughness={0.7} /* Matte clay finish */
+                        metalness={0.1}
                     />
                 </Sphere>
 
                 {/* Body */}
-                <RoundedBox args={[0.2, 0.35, 0.15]} radius={0.05} position={[0, 0.05, 0]}>
-                    <meshPhysicalMaterial
+                <RoundedBox args={[0.2, 0.35, 0.15]} radius={0.08} position={[0, 0.05, 0]}>
+                    <meshStandardMaterial
                         color={personColor}
-                        roughness={0.3}
-                        metalness={0.7}
+                        roughness={0.7}
+                        metalness={0.1}
                     />
                 </RoundedBox>
 
-                {/* Phone in hand (if not first or if user) */}
+                {/* Phone in hand */}
                 {(index !== 0 || isUser) && (
-                    <Box args={[0.06, 0.1, 0.01]} position={[0.12, 0.05, 0.08]}>
-                        <meshStandardMaterial color="#1e293b" emissive={isUser ? '#f093fb' : '#667eea'} emissiveIntensity={0.5} />
+                    <Box args={[0.06, 0.1, 0.01]} position={[0.12, 0.05, 0.08]} radius={0.02}>
+                        <meshStandardMaterial color="#ffffff" emissive={isUser ? '#f093fb' : '#ffffff'} emissiveIntensity={0.8} />
                     </Box>
                 )}
 
-                {/* "YOU" label above user */}
+                {/* "YOU" label */}
                 {isUser && (
                     <Text
                         position={[0, 0.6, 0]}
-                        fontSize={0.1}
-                        color="#f093fb"
+                        fontSize={0.12}
+                        color="#d946ef"
+                        fontWeight="bold"
                         anchorX="center"
                         anchorY="middle"
                     >
@@ -67,34 +68,40 @@ const QueuePerson = ({ position, index, isServed, isUser, color, scale = 1 }) =>
     )
 }
 
-// Counter/Service point
+// Sleek Modern Service Counter
 const ServiceCounter = ({ position, queueType }) => {
     return (
         <group position={position}>
-            {/* Counter */}
-            <RoundedBox args={[0.8, 0.5, 0.4]} radius={0.05} position={[0, 0.25, 0]}>
-                <meshPhysicalMaterial
-                    color="#1e1e3f"
-                    roughness={0.2}
-                    metalness={0.9}
+            {/* Main Podium (Sleek White) */}
+            <RoundedBox args={[0.7, 0.5, 0.4]} radius={0.05} position={[0, 0.25, 0]}>
+                <meshStandardMaterial
+                    color="#ffffff"
+                    roughness={0.1}
+                    metalness={0.1}
                 />
             </RoundedBox>
 
-            {/* Screen */}
-            <Box args={[0.3, 0.25, 0.02]} position={[0, 0.6, -0.1]}>
-                <meshStandardMaterial color="#0a0a1a" emissive={queueType === 'checkout' ? '#667eea' : '#f093fb'} emissiveIntensity={0.3} />
+            {/* Glowing Base strip */}
+            <Box args={[0.65, 0.02, 0.35]} position={[0, 0.02, 0]}>
+                <meshStandardMaterial color={queueType === 'checkout' ? '#667eea' : '#d946ef'} emissive={queueType === 'checkout' ? '#667eea' : '#d946ef'} emissiveIntensity={2} />
             </Box>
 
-            {/* Status light */}
-            <Sphere args={[0.04, 16, 16]} position={[0.25, 0.55, 0.2]}>
-                <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={2} />
-            </Sphere>
+            {/* Screen */}
+            <RoundedBox args={[0.3, 0.25, 0.02]} radius={0.01} position={[0, 0.6, -0.1]} rotation={[-0.1, 0, 0]}>
+                <meshStandardMaterial color="#171717" />
+            </RoundedBox>
 
-            {/* Queue type icon/label */}
+            {/* Screen Glow */}
+            <Box args={[0.26, 0.21, 0.03]} position={[0, 0.6, -0.09]} rotation={[-0.1, 0, 0]}>
+                <meshStandardMaterial color={queueType === 'checkout' ? '#818cf8' : '#f093fb'} emissive={queueType === 'checkout' ? '#818cf8' : '#f093fb'} emissiveIntensity={1.5} />
+            </Box>
+
+            {/* Queue type label floating above */}
             <Text
-                position={[0, 0.85, 0]}
-                fontSize={0.08}
-                color="#fff"
+                position={[0, 0.9, 0]}
+                fontSize={0.09}
+                color="#676869"
+                fontWeight="bold"
                 anchorX="center"
                 anchorY="middle"
             >
@@ -104,27 +111,15 @@ const ServiceCounter = ({ position, queueType }) => {
     )
 }
 
-// Queue line indicator
+// Modern Glowing Floor Track
 const QueueLine = ({ peopleCount }) => {
-    const lineRef = useRef()
-
-    useFrame((state) => {
-        if (lineRef.current) {
-            lineRef.current.material.dashOffset = -state.clock.elapsedTime * 0.5
-        }
-    })
-
-    const points = []
-    const lineLength = Math.min(peopleCount, 8)
-    for (let i = 0; i < lineLength + 2; i++) {
-        points.push(new THREE.Vector3(-1.5 + i * 0.5, -0.15, 0))
-    }
-    const lineGeometry = new THREE.BufferGeometry().setFromPoints(points)
+    const width = Math.min(peopleCount, 8) * 0.5 + 1
+    const centerX = 0.5 - (width / 2) + 0.5
 
     return (
-        <line ref={lineRef} geometry={lineGeometry}>
-            <lineDashedMaterial color="#667eea" dashSize={0.1} gapSize={0.05} linewidth={2} />
-        </line>
+        <RoundedBox args={[width, 0.02, 0.3]} radius={0.01} position={[centerX, -0.15, 0]}>
+            <meshStandardMaterial color="#f3f4f6" roughness={0.4} />
+        </RoundedBox>
     )
 }
 
@@ -135,7 +130,7 @@ const QueueVisualization3D = ({
     queueType = 'fitting_room',
     isYourTurn = false 
 }) => {
-    // Generate queue people based on props
+    
     const queuePeople = useMemo(() => {
         const people = []
         const displayCount = Math.min(totalInQueue, 8)
@@ -148,8 +143,8 @@ const QueueVisualization3D = ({
                 index: i,
                 isServed: positionIndex < userPosition,
                 isUser: positionIndex === userPosition,
-                color: queueType === 'checkout' ? '#667eea' : '#764ba2',
-                scale: Math.max(0.5, 1 - (displayCount - 3) * 0.08)
+                color: queueType === 'checkout' ? '#818cf8' : '#c084fc',
+                scale: Math.max(0.85, 1.1 - (displayCount - 3) * 0.04)
             })
         }
         return people
@@ -157,44 +152,56 @@ const QueueVisualization3D = ({
 
     return (
         <Canvas
-            camera={{ position: [0, 0.5, 3], fov: 50 }}
-            style={{
-                width: '100%',
-                height: '100%',
-                background: 'transparent'
-            }}
+            // 👉 CHANGED: Dropped Y to 0.6 and pushed Z all the way in to 3.2!
+            camera={{ position: [0, 0.6, 3.2], fov: 40 }} 
+            style={{ width: '100%', height: '100%', background: 'transparent' }}
         >
-            <ambientLight intensity={0.4} />
-            <directionalLight position={[5, 5, 5]} intensity={1} />
-            <pointLight position={[-5, 5, -5]} intensity={0.5} color="#f093fb" />
+            {/* Softer Lighting Setup */}
+            <ambientLight intensity={0.6} />
+            <directionalLight position={[5, 8, 2]} intensity={1.5} color="#ffffff" castShadow />
+            <pointLight position={[-2, 2, 2]} intensity={0.8} color={queueType === 'checkout' ? '#818cf8' : '#f093fb'} />
 
+            {/* Beautiful Studio Lighting Environment */}
             <Environment preset="city" />
 
-            {/* Service Counter */}
-            <ServiceCounter position={[1.5, 0, 0]} queueType={queueType} />
+            {/* ✨ THE MAGIC: Contact Shadows to ground the elements ✨ */}
+            <ContactShadows 
+                position={[0, -0.14, 0]} 
+                opacity={0.6} 
+                scale={10} 
+                blur={2.5} 
+                far={4} 
+                color="#000000"
+            />
 
-            {/* Dynamic Queue people */}
-            {queuePeople.map((person, idx) => (
-                <QueuePerson
-                    key={idx}
-                    position={person.position}
-                    index={person.index}
-                    isServed={person.isServed}
-                    isUser={person.isUser}
-                    color={person.color}
-                    scale={person.scale}
-                />
-            ))}
+            <group position={[0, -0.2, 0]}>
+                {/* Service Counter */}
+                <ServiceCounter position={[1.5, 0, 0]} queueType={queueType} />
 
-            {/* Queue line */}
-            <QueueLine peopleCount={totalInQueue} />
+                {/* Dynamic Queue people */}
+                {queuePeople.map((person, idx) => (
+                    <QueuePerson
+                        key={idx}
+                        position={person.position}
+                        index={person.index}
+                        isServed={person.isServed}
+                        isUser={person.isUser}
+                        color={person.color}
+                        scale={person.scale}
+                    />
+                ))}
+
+                {/* Queue line / pad */}
+                <QueueLine peopleCount={totalInQueue} />
+            </group>
 
             {/* Your Turn indicator */}
             {isYourTurn && (
                 <Text
-                    position={[0, 1, 0]}
-                    fontSize={0.15}
+                    position={[0, 1.2, 0]}
+                    fontSize={0.18}
                     color="#10b981"
+                    fontWeight="bold"
                     anchorX="center"
                     anchorY="middle"
                 >

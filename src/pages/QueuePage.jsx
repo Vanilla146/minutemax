@@ -12,6 +12,7 @@ import './QueuePage.css'
 
 // Images
 import queueIllustration from '../assets/images/queue-illustration.png'
+import activeQueueIllustration from '../assets/images/queue-illustration.png'
 // Queue options
     const queueOptions = [
     {
@@ -511,289 +512,253 @@ return (
             ) : (
                 // ✅ THE NORMAL APP UI
                 <>
-            {/* Background */}
-            <div className="queue-bg-gradient" />
+                    {/* Background */}
+                    <div className="queue-bg-gradient" />
 
-            {/* Header */}
-            <section className="queue-header">
-                <div className="container">
-                    <div className="queue-hero-layout">
-                        <motion.div
-                            className="queue-header-content"
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <span className="page-label">Virtual Queue</span>
-                            <h1>Skip the Line, <span className="gradient-text">Shop Smart</span></h1>
-                            <p>Join our virtual queue and receive real-time updates. Shop freely while you wait!</p>
+                    {/* Notification Popup */}
+                    <AnimatePresence>
+                        {notification && (
+                            <motion.div
+                                className={`notification notification-${notification.type}`}
+                                initial={{ opacity: 0, y: -50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -50 }}
+                            >
+                                <FiBell />
+                                <span>{notification.message}</span>
+                                <button onClick={() => setNotification(null)}>×</button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                            {/* Store Info */}
-                            {store && (
-                                <div className="store-info-badge">
-                                    <FiMapPin />
-                                    <span>{store.name} - {store.address}</span>
-                                </div>
-                            )}
-
-                            {!apiConnected && (
-                                <div className="api-status-badge">
-                                    <FiAlertCircle /> Demo mode - Start backend for full functionality
-                                </div>
-                            )}
-                        </motion.div>
-                        <motion.div
-                            className="queue-hero-image"
-                            initial={{ opacity: 0, x: 30 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                        >
-                            <img src={queueIllustration} alt="Smart Queue Illustration" />
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Notification */}
-            <AnimatePresence>
-                {notification && (
-                    <motion.div
-                        className={`notification notification-${notification.type}`}
-                        initial={{ opacity: 0, y: -50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -50 }}
-                    >
-                        <FiBell />
-                        <span>{notification.message}</span>
-                        <button onClick={() => setNotification(null)}>×</button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Main Content */}
-            <section className="queue-content">
-                <div className="container">
-                    <div className="queue-layout">
-                        {/* Queue Selection / Status */}
-                        <div className="queue-panel">
-                            {loading ? (
-    <div className="loading-state">
-                                    <FiLoader className="spinner" />
-                                    <p>Loading...</p>
-                                </div>
-                            ) : !selectedQueue ? (
-                                <>
-                                    <h2>Select Your Queue</h2>
-                                    <p className="queue-instruction">Choose where you'd like to wait</p>
-
-                                    {/* Smart Queue Detection */}
-                                    <div className="smart-queue-detect">
-                                        <h4>🤖 Quick Selection - What brings you here today?</h4>
-                                        <div className="intent-buttons">
-                                            <button
-                                                className="intent-btn"
-                                                onClick={() => joinQueue('fitting_room')}
-                                            >
-                                                👗 Want to try on clothes
-                                            </button>
-                                            <button
-                                                className="intent-btn"
-                                                onClick={() => joinQueue('checkout')}
-                                            >
-                                                💳 Ready to pay
-                                            </button>
-                                            <button
-                                                className="intent-btn browse"
-                                                onClick={() => setNotification({ type: 'info', message: 'Browse freely! Join a queue when you\'re ready.' })}
-                                            >
-                                                👀 Just browsing
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="queue-divider">
-                                        <span>or select manually</span>
-                                    </div>
-
-                                    <div className="queue-options">
-                                        {queueOptions.map((queue, index) => {
-                                            const queueData = queueStatus?.[queue.type === 'checkout' ? 'cashier' : queue.type]
-                                            return (
-                                                <motion.div
-                                                    key={queue.type}
-                                                    className="queue-option"
-                                                    initial={{ opacity: 0, x: -30 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ delay: index * 0.1 }}
-                                                    onClick={() => joinQueue(queue.type)}
-                                                    style={{ '--queue-color': queue.color }}
-                                                >
-                                                    <div className="queue-option-icon">
-  {React.createElement(queue.icon)}
-</div>
-                                                    <div className="queue-option-info">
-                                                        <h3>{queue.name}</h3>
-                                                        <p className="queue-description">{queue.description}</p>
-                                                        <div className="queue-meta">
-                                                            <span><FiUsers /> {queueData?.count || 0} waiting</span>
-                                                            <span><FiClock /> ~{queueData?.estimatedWait || 0} min</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="queue-option-action">
-                                                        Join →
-                                                    </div>
-                                                </motion.div>
-                                            )
-                                        })}
-                                    </div>
-                                </>
-                            ) : (
-                                <motion.div
-                                    className="queue-status"
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                >
-                                    <div className="queue-actions-header">
-    <button className="back-btn" onClick={leaveQueue}>← Leave queue</button>
-    
-    <button 
-        className="refresh-btn" 
-        onClick={async () => {
-            setIsRefreshing(true);
-            await refreshQueue();
-            // Keep spinning for at least 500ms so it feels responsive
-            setTimeout(() => setIsRefreshing(false), 500); 
-        }}
-    >
-        <motion.div
-            animate={{ rotate: isRefreshing ? 360 : 0 }}
-            transition={{ duration: 0.5, ease: "linear", repeat: isRefreshing ? Infinity : 0 }}
-        >
-            <FiRefreshCw />
-        </motion.div>
-        Refresh
-    </button>
-</div>  
-
-                                    <div className="status-header">
-                                        <div className="status-icon" style={{ background: selectedQueue.color }}>
-{SelectedIcon && <SelectedIcon />}
-</div>
-                                        <div className="status-title">
-                                            <h2>{selectedQueue.name}</h2>
-                                            <p>{store?.name}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Visual Queue Animation Component */}
-                                    {showVisualQueue && userQueueStatus && (
-                                        <VisualQueue
-                                            position={userQueueStatus.position}
-                                            totalInQueue={selectedQueue?.peopleInQueue || 9}
-                                            estimatedWait={userQueueStatus.estimatedWait || 0}
-                                            queueType={selectedQueue?.type}
-                                            isYourTurn={userQueueStatus.position === 1}
-                                        />
-                                    )}
-
-                                    {/* Token Number Display */}
-                                    <div className="token-display">
-                                        <span className="token-label">Your Token</span>
-                                        <span className="token-number">{userQueueStatus?.token}</span>
-                                    </div>
-
-                                    <div className="status-cards">
-                                        <div className="status-card">
-                                            <FiHash />
-                                            <div className="status-card-value">{userQueueStatus?.position || 1}</div>
-                                            <div className="status-card-label">Position</div>
-                                        </div>
-                                        <div className="status-card highlight">
-                                            <FiClock />
-                                            <div className="status-card-value">{userQueueStatus?.estimatedWait || 0}</div>
-                                            <div className="status-card-label">Minutes Left</div>
-                                        </div>
-                                        <div className="status-card">
-                                            <FiUsers />
-                                            <div className="status-card-value">{(userQueueStatus?.position || 1) - 1}</div>
-                                            <div className="status-card-label">Ahead of You</div>
-                                        </div>
-                                    </div>
-
-                                    {userQueueStatus?.position === 1 && (
-                                        <motion.div
-                                            className="your-turn-alert"
-                                            initial={{ scale: 0.8 }}
-                                            animate={{ scale: [1, 1.05, 1] }}
-                                            transition={{ repeat: Infinity, duration: 1.5 }}
-                                        >
-                                            <FiAlertCircle />
-                                            <span>It's Your Turn!</span>
-                                        </motion.div>
-                                    )}
-
-                                    <button className="btn btn-secondary leave-btn" onClick={leaveQueue}>
-                                        Leave Queue
-                                    </button>
+                    {/* Main Content (Stacked Layout) */}
+                    <section className="queue-content" style={{ paddingTop: '40px' }}>
+                        <div className="container">
+                            <div className="queue-layout">
+                                
+                                {/* --- LEFT COLUMN: Stacked Text + Panel --- */}
+                                <div className="left-column" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                                     
-                                </motion.div>
-                            )}
-                        </div>
+                                    {/* 1. Hero Text */}
+                                    <motion.div
+                                        className="queue-header-content"
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.6 }}
+                                    >
+                                        <span className="page-label">Virtual Queue</span>
+                                        <h1 style={{ marginTop: '16px' }}>Skip the Line, <span className="gradient-text">Shop Smart</span></h1>
+                                        <p style={{ color: '#676869', marginTop: '8px', marginBottom: '16px' }}>
+                                            Join our virtual queue and receive real-time updates. Shop freely while you wait!
+                                        </p>
 
-                        {/* 3D Visualization */}
-                        <div className="queue-visualization">
-                            <div className="visualization-container">
-                                <Suspense fallback={<div className="viz-loader">Loading 3D View...</div>}>
-                                    <QueueVisualization3D
-                                        totalInQueue={selectedQueue?.peopleInQueue || 5}
-                                        userPosition={userQueueStatus?.position || 2}
-                                        queueType={selectedQueue?.type || 'fitting_room'}
-                                        isYourTurn={userQueueStatus?.position === 1}
-                                    />
-                                </Suspense>
-                            </div>
-                            <div className="visualization-label">
-                                <FiMapPin /> Live Queue Visualization
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                                        {store && (
+                                            <div className="store-info-badge">
+                                                <FiMapPin />
+                                                <span>{store.name} - {store.address}</span>
+                                            </div>
+                                        )}
 
-            {/* QR Code Section */}
-            <section className="qr-section">
-                <div className="container">
-                    <motion.div
-                        className="qr-card"
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                    >
-                        <div className="qr-content">
-                            <h3>Scan to Join Queue Instantly</h3>
-                            <p>Use your phone camera to scan and join the queue</p>
+                                        {!apiConnected && (
+                                            <div className="api-status-badge" style={{ marginTop: '12px', display: 'flex' }}>
+                                                <FiAlertCircle /> Demo mode - Start backend for full functionality
+                                            </div>
+                                        )}
+                                    </motion.div>
+
+                                    {/* 2. Queue Selection Box */}
+                                    <div className="queue-panel">
+                                        {loading ? (
+                                            <div className="loading-state">
+                                                <FiLoader className="spinner" />
+                                                <p>Loading...</p>
+                                            </div>
+                                        ) : !selectedQueue ? (
+                                            <>
+                                                <h2>Select Your Queue</h2>
+                                                <p className="queue-instruction">Choose where you'd like to wait</p>
+
+                                                <div className="smart-queue-detect">
+                                                    <h4>🤖 Quick Selection - What brings you here today?</h4>
+                                                    <div className="intent-buttons">
+                                                        <button className="intent-btn" onClick={() => joinQueue('fitting_room')}>👗 Want to try on clothes</button>
+                                                        <button className="intent-btn" onClick={() => joinQueue('checkout')}>💳 Ready to pay</button>
+                                                        <button className="intent-btn browse" onClick={() => setNotification({ type: 'info', message: 'Browse freely! Join a queue when you\'re ready.' })}>👀 Just browsing</button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="queue-divider"><span>or select manually</span></div>
+
+                                                <div className="queue-options">
+                                                    {queueOptions.map((queue, index) => {
+                                                        const queueData = queueStatus?.[queue.type === 'checkout' ? 'cashier' : queue.type]
+                                                        return (
+                                                            <motion.div
+                                                                key={queue.type} className="queue-option"
+                                                                initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }}
+                                                                onClick={() => joinQueue(queue.type)} style={{ '--queue-color': queue.color }}
+                                                            >
+                                                                <div className="queue-option-icon">{React.createElement(queue.icon)}</div>
+                                                                <div className="queue-option-info">
+                                                                    <h3>{queue.name}</h3>
+                                                                    <p className="queue-description">{queue.description}</p>
+                                                                    <div className="queue-meta">
+                                                                        <span><FiUsers /> {queueData?.count || 0} waiting</span>
+                                                                        <span><FiClock /> ~{queueData?.estimatedWait || 0} min</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="queue-option-action">Join →</div>
+                                                            </motion.div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <motion.div className="queue-status" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+                                                <div className="queue-actions-header">
+                                                    <button className="back-btn" onClick={leaveQueue}>← Leave queue</button>
+                                                    <button className="refresh-btn" onClick={async () => { setIsRefreshing(true); await refreshQueue(); setTimeout(() => setIsRefreshing(false), 500); }}>
+                                                        <motion.div animate={{ rotate: isRefreshing ? 360 : 0 }} transition={{ duration: 0.5, ease: "linear", repeat: isRefreshing ? Infinity : 0 }}><FiRefreshCw /></motion.div>
+                                                        Refresh
+                                                    </button>
+                                                </div>  
+
+                                                <div className="status-header">
+                                                    <div className="status-icon" style={{ background: selectedQueue.color }}>{SelectedIcon && <SelectedIcon />}</div>
+                                                    <div className="status-title">
+                                                        <h2>{selectedQueue.name}</h2>
+                                                        <p>{store?.name}</p>
+                                                    </div>
+                                                </div>
+
+                                                {showVisualQueue && userQueueStatus && (
+                                                    <VisualQueue
+                                                        position={userQueueStatus.position} totalInQueue={selectedQueue?.peopleInQueue || 9}
+                                                        estimatedWait={userQueueStatus.estimatedWait || 0} queueType={selectedQueue?.type}
+                                                        isYourTurn={userQueueStatus.position === 1}
+                                                    />
+                                                )}
+
+                                                <div className="token-display">
+                                                    <span className="token-label">Your Token</span>
+                                                    <span className="token-number">{userQueueStatus?.token}</span>
+                                                </div>
+
+                                                <div className="status-cards">
+                                                    <div className="status-card">
+                                                        <FiHash />
+                                                        <div className="status-card-value">{userQueueStatus?.position || 1}</div>
+                                                        <div className="status-card-label">Position</div>
+                                                    </div>
+                                                    <div className="status-card highlight">
+                                                        <FiClock />
+                                                        <div className="status-card-value">{userQueueStatus?.estimatedWait || 0}</div>
+                                                        <div className="status-card-label">Minutes Left</div>
+                                                    </div>
+                                                    <div className="status-card">
+                                                        <FiUsers />
+                                                        <div className="status-card-value">{Math.max(0, (userQueueStatus?.position || 1) - 1)}</div>
+                                                        <div className="status-card-label">Ahead of You</div>
+                                                    </div>
+                                                </div>
+
+                                                {userQueueStatus?.position === 1 && (
+                                                    <motion.div className="your-turn-alert" initial={{ scale: 0.8 }} animate={{ scale: [1, 1.05, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+                                                        <FiAlertCircle /> <span>It's Your Turn!</span>
+                                                    </motion.div>
+                                                )}
+
+                                                <button className="btn btn-secondary leave-btn" onClick={leaveQueue}>Leave Queue</button>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                </div>
+
+                               {/* --- RIGHT COLUMN: Image AND/OR 3D View --- */}
+                                <div className="right-column" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '24px' }}>
+                                    
+                                    {/* Dynamic Image with Blending Shade */}
+                                    <motion.div
+                                        className="queue-hero-image"
+                                        initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
+                                        style={{ 
+                                            flex: selectedQueue ? 1 : 'none', 
+                                            height: selectedQueue ? 'auto' : '100%',
+                                            minHeight: selectedQueue ? '200px' : 'auto',
+                                            width: '100%',
+                                            position: 'relative', /* 👉 NEW: We need this for the overlay! */
+                                            borderRadius: '12px', /* Moved from the image to the container */
+                                            overflow: 'hidden'    /* Ensures the overlay stays inside the box */
+                                        }}
+                                    >
+                                        <img 
+                                            // 👉 CHANGED: Replaced the real photo with a beautiful flat-art retail illustration
+                                            src={selectedQueue ? activeQueueIllustration : queueIllustration}
+                                            alt="Smart Queue Illustration" 
+                                            style={{ 
+                                                width: '100%', 
+                                                height: '100%', 
+                                                objectFit: 'cover', 
+                                                // 👉 CHANGED: Adjusted to 'center 20%' so the clothing racks stay in view
+                                                objectPosition: 'center 20%', 
+                                                boxShadow: '0 8px 30px rgba(0,0,0,0.08)' 
+                                            }} 
+                                        />
+                                        
+                                        {/* 👉 NEW: This is the shading overlay div! */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100px', /* This is the "shade" height */
+                                            background: 'linear-gradient(to bottom, rgba(23, 23, 23, 0.4) 0%, rgba(23, 23, 23, 0) 100%)',
+                                            pointerEvents: 'none', /* Ensures you can't click the shade */
+                                            zIndex: 1
+                                        }} />
+                                    </motion.div>
+
+                                    {/* 3D View (Fixed height at the bottom) */}
+                                    {selectedQueue && (
+                                        <div className="queue-visualization" style={{ height: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+                                            <div className="visualization-container" style={{ flex: 1, height: '100%', minHeight: 'unset' }}>
+                                                <Suspense fallback={<div className="viz-loader">Loading 3D View...</div>}>
+                                                    <QueueVisualization3D
+                                                        totalInQueue={selectedQueue?.peopleInQueue || 5}
+                                                        userPosition={userQueueStatus?.position || 2}
+                                                        queueType={selectedQueue?.type || 'fitting_room'}
+                                                        isYourTurn={userQueueStatus?.position === 1}
+                                                    />
+                                                </Suspense>
+                                            </div>
+                                            <div className="visualization-label" style={{ marginTop: '12px' }}>
+                                                <FiMapPin /> Live Queue Visualization
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        <div className="qr-code-container">
-                            <QRCodeSVG
-                                value={getQrCodeUrl()}
-                                size={180}
-                                bgColor="#ffffff"
-                                fgColor="#000000"
-                                level="H"
-                                includeMargin={true}
-                            />
-                            <p className="qr-scan-hint">Scan with your phone camera</p>
-                            <Link to="/queue/qr" className="qr-fullscreen-btn">
-                                <FiMaximize2 />
-                                <span>View Full Screen</span>
-                            </Link>
+                    </section>
+
+                    {/* QR Code Section */}
+                    <section className="qr-section">
+                        <div className="container">
+                            <motion.div className="qr-card" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+                                <div className="qr-content">
+                                    <h3>Scan to Join Queue Instantly</h3>
+                                    <p>Use your phone camera to scan and join the queue</p>
+                                </div>
+                                <div className="qr-code-container">
+                                    <QRCodeSVG value={getQrCodeUrl()} size={180} bgColor="#ffffff" fgColor="#000000" level="H" includeMargin={true} />
+                                    <p className="qr-scan-hint">Scan with your phone camera</p>
+                                    <Link to="/queue/qr" className="qr-fullscreen-btn"><FiMaximize2 /> <span>View Full Screen</span></Link>
+                                </div>
+                            </motion.div>
                         </div>
-                    </motion.div>
-                </div>
-            </section>
-        </>
-        )} 
-        {/* ^^^ ADD THESE TWO LINES TO CLOSE THE BLOCKER CONDITION ^^^ */}
+                    </section>
+                </>
+            )}
         </div>
     )
 }
